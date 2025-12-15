@@ -38,6 +38,7 @@ function Approval() {
         </div>
       ))}
       <p>test git</p>
+      <p>test git</p>
     </div>
   );
 }
