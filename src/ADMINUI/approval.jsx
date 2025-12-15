@@ -34,8 +34,10 @@ function Approval() {
         <div key={user.id}>
           <p>{user.firstname} {user.lastname}</p>
           <p>{user.email}</p>
+
         </div>
       ))}
+      <p>test git</p>
     </div>
   );
 }
