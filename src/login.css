@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+body{
+  @apply bg-emerald-100 mt-16
+}
+.title{
+  @apply flex  justify-self-center font-bold text-6xl mt-24 mb-3;
+}
+.info{
+  @apply flex justify-self-center text-3xl w-240 h-fit 
+}
+.login{
+  @apply h-85 w-100 bg-gray-100 gap-4 flex flex-col mx-auto mt-10 p-10
+  rounded-2xl shadow-2xl;
+  form{
+    @apply flex flex-col text-black
+  }
+  input{
+    @apply bg-white border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2
+     focus:ring-green-600 mb-2
+  }
+  .loginb{
+    @apply bg-green-500 w-50 mx-auto text-white p-1 rounded-xl mt-2;
+  }
+  .registerb{
+    @apply bg-green-800 text-white p-2;
+  }
+}

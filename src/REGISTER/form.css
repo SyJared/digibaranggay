@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+.form{
+  @apply flex flex-col text-white border p-6 w-full max-w-lg bg-gray-100 rounded-xl mx-auto mt-28 shadow-2xl;
+  label{
+    @apply text-gray-800 font-semibold mt-2 mb-1;
+  }
+  .title{
+    @apply flex font-bold text-4xl mt-3 mb-3 text-black;
+  }
+  input{
+    @apply bg-white border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-600 text-black;
+  }
+  .message{
+    @apply text-xs text-red-600
+  }
+
+  .fields{
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+  }
+
+  .submit{
+    @apply bg-green-500 w-full text-white p-2 rounded-xl mt-6;
+  }
+}
+
