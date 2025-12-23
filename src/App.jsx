@@ -3,6 +3,9 @@ import Header from './header';
 import Login from './login';
 import Register from "./REGISTER/register";
 import Adhome from "./ADMINUI/adhome";
+import User from "./USERUI/user"; 
+
+
 function App() {
   return (
     <div>
@@ -11,6 +14,8 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/REGISTER/register" element={<Register />} />
         <Route path="/ADMINUI/adhome" element={<Adhome />}></Route>
+        <Route path="/USERUI/user" element={<User />}></Route>
+        
       </Routes>
     </div>
   );

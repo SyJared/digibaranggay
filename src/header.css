@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 .head{
-  @apply bg-green-700 w-full h-16 flex fixed top-0 left-0 z-50;;
+  @apply bg-emerald-800  w-full h-16 flex fixed top-0 left-0 z-50 border-2 border-emerald-300;
 
   span{
     @apply text-white self-center text-3xl ml-2

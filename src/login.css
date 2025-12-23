@@ -7,7 +7,7 @@ body{
   @apply flex  justify-self-center font-bold text-6xl mt-24 mb-3;
 }
 .info{
-  @apply flex justify-self-center text-3xl w-240 h-fit 
+  @apply inline-block text-center flex ml-70 text-3xl w-240 h-fit 
 }
 .login{
   @apply h-85 w-100 bg-gray-100 gap-4 flex flex-col mx-auto mt-10 p-10

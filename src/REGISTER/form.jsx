@@ -35,7 +35,7 @@ function Form() {
       setMessage(data.message);
       
       if (data.success) {
-        setForm({ firstname: "", middlename: "", lastName: "", email: "", password: "", address: "", birthdate: "" });
+        setForm({ firstname: "", middlename: "", lastname: "", email: "", password: "", address: "", birthdate: ""});
         setConfirmPassword("");
       }
     } catch (err) {

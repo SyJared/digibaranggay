@@ -12,6 +12,7 @@ function Approval() {
         if (result.success && result.data.length > 0) {
           setUsers(result.data);
           setError("");
+          console.log(result.data);
         } else {
           setError("No data found");
         }
