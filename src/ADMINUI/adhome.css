@@ -19,12 +19,45 @@
   
 }
 .dropdown{
-  @apply w-54 h-fit bg-white shadow-xl rounded-lg p-4 mt-1   ml-95 flex flex-col gap-2 absolute z-20;
+  @apply w-54 h-fit bg-white shadow-xl rounded-lg p-4 mt-1   ml-300 flex flex-col gap-2 absolute z-20;
   li{
     @apply text-black hover:bg-green-100 p-2 rounded-lg cursor-pointer;
   }
 }
+.manageuser{
+  @apply w-360 h-150 flex justify-self-center bg-white rounded-lg mt-5 ml-3 flex flex-col border-green-600 border-2 p-3
+  overflow-y-auto gap-4 ;
+}
 
-.approvalbubble{
-  @apply w-360 h-150 flex justify-self-center bg-white rounded-lg mt-5 ml-3 flex flex-col border-green-600 border-2 ;
+.mu{
+  @apply bg-white flex flex-col gap-3;
+  .users{
+    @apply shadow-xl p-3 grid grid-cols-2 rounded-xl bg-green-100 border-1 border-green-700;
+  }
+  .editb{
+    @apply bg-green-800 mr-5 text-white pl-3 pr-3;
+  }
+  .deleteb{
+    @apply bg-red-900 text-white pl-3 pr-3;
+  }
+  .buttons{
+    @apply flex gap-2;
+  }
+  .expand{
+    @apply overflow-hidden transition-all duration-300;
+  }
+} 
+
+.requestees{
+  @apply flex flex-col gap-3; 
+  .users{
+    @apply bg-green-100 border-green-700 border-1 w-200 grid grid-cols-3 p-3 rounded-2xl text-black 
+  }
+  
+}
+.filters{
+  @apply text-xs font-medium flex gap-3;
+  button{
+    @apply p-2 bg-emerald-800 text-white
+  }
 }
