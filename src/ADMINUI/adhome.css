@@ -92,3 +92,20 @@
        flex justify-between items-center hover:border-y-1 transition-all duration-100 max-h-15;
 }
 }
+
+.announcement-div {
+  @apply grid grid-cols-2 gap-5 m-9;
+}
+.existing-announcement {
+  @apply flex flex-col gap-4 overflow-y-auto max-h-130 pr-2;
+}
+.ann-title-date {
+  @apply p-4 rounded-xl border bg-gradient-to-br from-emerald-50 to-emerald-100
+     border-emerald-200 shadow-sm hover:shadow-md transition-shadow duration-300;
+}
+.ann {
+  @apply flex items-center;
+}
+.make-announcement {
+  @apply  p-5 border rounded-xl bg-white shadow-sm w-full;
+}

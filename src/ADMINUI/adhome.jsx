@@ -4,6 +4,7 @@ import { act, useState } from "react";
 import Manageusers from "./manageusers";
 import Requestees from "./requestees";
 import Records from "./records";
+import Announcement from "./announcement";
 
 function Adhome() {
   const [active, setActive] = useState(""); // currently active main or dropdown item
@@ -65,6 +66,7 @@ function Adhome() {
        {active === "Manage Users" && <Manageusers />}
        {active === "Requests" && <Requestees />}
        {active ==="Records" && <Records />}
+       {active === "Make announcement" && <Announcement />}
        </div>
     </>
   );

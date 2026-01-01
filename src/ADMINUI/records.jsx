@@ -30,7 +30,7 @@ const [message, setMessage] = useState('');
    <div className="records-div">
     {message && <p>{message}</p>}
   {users.map(u => {
-    console.log(u.transaction)
+    
     return (
       <div className={`record-info ${statusBorder[u.status]}`}>
         <h2 className="text-lg font-semibold text-emerald-900">
