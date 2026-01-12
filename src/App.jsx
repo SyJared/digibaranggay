@@ -4,7 +4,7 @@ import Login from './login';
 import Register from "./REGISTER/register";
 import Adhome from "./ADMINUI/adhome";
 import User from "./USERUI/user"; 
-
+import { AnnouncementList }  from "./ADMINUI/announcementList";
 
 function App() {
   return (
@@ -13,8 +13,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/REGISTER/register" element={<Register />} />
-        <Route path="/ADMINUI/adhome" element={<Adhome />}></Route>
-        <Route path="/USERUI/user" element={<User />}></Route>
+        
+          <Route path="/ADMINUI/adhome" element={<AnnouncementList><Adhome /></AnnouncementList>}></Route>
+        <Route path="/USERUI/user" element={<AnnouncementList><User /></AnnouncementList>}></Route>
+        
         
       </Routes>
     </div>

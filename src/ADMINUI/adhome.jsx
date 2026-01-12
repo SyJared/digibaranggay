@@ -1,10 +1,13 @@
 import "./adhome.css";
-import down from "../assets/down.png";
 import { act, useState } from "react";
 import Manageusers from "./manageusers";
 import Requestees from "./requestees";
 import Records from "./records";
 import Announcement from "./announcement";
+import requestIcon from '../assets/application.png'
+import megaphone from '../assets/megaphone.png'
+import management from '../assets/management.png';
+import records from '../assets/edit.png';
 
 function Adhome() {
   const [active, setActive] = useState(""); // currently active main or dropdown item
@@ -27,7 +30,7 @@ function Adhome() {
   };
 
   return (
-    <>
+    <div className="">
       <div className="navs">
         <span>to be coded</span>
       </div>
@@ -37,27 +40,27 @@ function Adhome() {
         
         <button
           onClick={() => handleMainClick("Requests")}
-          className={active === "Requests" ? "bg-white" : ""}
+          className={active === "Requests" ? "primary-color text-white" : ""}
         >
-          Requests
+          <img src={requestIcon} alt="" className="icon-size" />Requests
         </button>
         <button
           onClick={() => handleMainClick("Make announcement")}
-          className={active === "Make announcement" ? "bg-white" : ""}
+          className={active === "Make announcement" ? "primary-color text-white" : ""}
         >
-          Make announcement
+          <img src={megaphone} alt="" className="icon-size" />Make announcement
         </button>
         <button
           onClick={() => handleMainClick("Manage Users")}
-          className={active === "Manage Users" ? "bg-white" : ""}
+          className={active === "Manage Users" ? "primary-color text-white" : ""}
         >
-          Manage Users
+          <img src={management} alt="" className="icon-size" />Manage Users
         </button>
         <button
           onClick={() => handleMainClick("Records")}
-          className={active === "Records" ? "bg-white" : ""}
+          className={active === "Records" ? "primary-color text-white" : ""}
         >
-          Records
+          <img src={records} alt="" className="icon-size" />Records
         </button>
         
       </div>
@@ -68,7 +71,7 @@ function Adhome() {
        {active ==="Records" && <Records />}
        {active === "Make announcement" && <Announcement />}
        </div>
-    </>
+    </div>
   );
 }
 

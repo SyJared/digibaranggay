@@ -1,28 +1,38 @@
 @import "tailwindcss";
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
 
-body{
-  @apply bg-emerald-100 mt-16
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE & Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+body {
+  @apply bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50
+         mt-16 px-6;
 }
 .title{
-  @apply flex  justify-self-center font-bold text-6xl mt-24 mb-3;
+  @apply flex bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent  justify-self-center font-bold 
+  text-[50px] mt-24 mb-3 mx-auto;
 }
 .info{
-  @apply inline-block text-center flex ml-70 text-3xl w-240 h-fit 
+  @apply text-center flex justify-self-center font-normal text-2xl w-150 h-fit mx-auto text-gray-600
 }
 .login{
-  @apply h-85 w-100 bg-gray-100 gap-4 flex flex-col mx-auto mt-10 p-10
-  rounded-2xl shadow-2xl;
+  @apply h-85 w-100 bg-white/90 backdrop-blur  gap-4 flex flex-col mx-auto mt-10 p-10
+  rounded-2xl shadow-xl border-emerald-200 border-1;
   form{
     @apply flex flex-col text-black
   }
   input{
-    @apply bg-white border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2
-     focus:ring-green-600 mb-2
+    @apply bg-emerald-50 border-2 border-emerald-200 rounded-lg p-2 focus:outline-none focus:ring-2
+     focus:ring-teal-600 mb-2
   }
   .loginb{
-    @apply bg-green-500 w-50 mx-auto text-white p-1 rounded-xl mt-2;
+    @apply bg-gradient-to-r from-emerald-500 to-teal-500 w-50 mx-auto text-white p-1 rounded-xl mt-2;
   }
   .registerb{
-    @apply bg-green-800 text-white p-2;
+    @apply bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-2;
   }
 }

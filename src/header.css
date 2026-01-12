@@ -1,9 +1,11 @@
 @import "tailwindcss";
 
-.head{
-  @apply bg-emerald-800  w-full h-16 flex fixed top-0 left-0 z-50 border-2 border-emerald-300;
+.head {
+  @apply bg-white/90 backdrop-blur
+         w-full h-17 flex fixed top-0 left-0 z-50
+         shadow-sm px-6 border-b border-b-2 border-green-200;
+}
 
-  span{
-    @apply text-white self-center text-3xl ml-2
-  }
+.head span {
+  @apply bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent text-2xl font-bold h-fit my-auto;
 }

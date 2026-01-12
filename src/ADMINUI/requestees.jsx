@@ -2,7 +2,6 @@ import { useEffect, useState } from "react"
 
 function Requestees(){
 const [message, setMessage] = useState('');
-const [error, setError] = useState('');
 const [users, setUsers] = useState([]);
 const [active, setActive] = useState(null);
 const [filter, setFilter] = useState('');
@@ -17,6 +16,7 @@ const [filter, setFilter] = useState('');
             
           } else {
             setError("No data found");
+            setMessage(result.message)
           }
           
         })
@@ -42,6 +42,8 @@ const [filter, setFilter] = useState('');
         const data = await res.json();
         if(data.Success === true){
           setMessage(data.message)
+        }else{
+          setMessage(data.message)
         }
 
       } catch (error) {
@@ -57,6 +59,7 @@ const [filter, setFilter] = useState('');
       }
     };
 
+  const filteredPending = users.filter(user => (!filter || user.transaction === filter) && user.status === 'Pending');
   const selectedUser =users.find(u=> u.id === active?.id && u.transaction === active?.transaction)
 
   return(<>
@@ -64,7 +67,7 @@ const [filter, setFilter] = useState('');
   {["KKID Card","Proof of residency","Brgy. Clearance","Certificate of indigency","Sedula","First job seeker"].map(item => (
     <button key={item}
       className={`transition-all duration-200 ${
-        filter === item ? 'bg-green-800 text-white' : 'bg-green-200 text-green-800'}`}
+        filter === item ? 'primary-color text-white' : 'bg-emerald-200 text-green-800'}`}
         onClick={() => setFilter(item)}>
       {item}
     </button>
@@ -74,19 +77,26 @@ const [filter, setFilter] = useState('');
   </button>}
 </div>
     <div className="requestees-container">
-    <div className="requestees ">
-      {error && <p className="flex mx-auto my-auto">{error}</p>}
-      {users.filter(user => (!filter || user.transaction === filter) && user.status === 'Pending')
-      .map(user => {
+    <div className="requestees no-scrollbar">
+      
+      {filteredPending.length === 0 ? 
+      <p className="flex mx-auto my-auto text-gray-500 text-center">
+    {filter ? `There are no pending ${filter} requests`: 'There are no pending requests'}
+    </p> 
+      :filteredPending.map(user => {
         const isActive = active?.id === user.id && active?.transaction === user.transaction;
         return(
-          <div className={`users ${isActive ? 'bg-white translate-x-1.5' : 'bg-green-100' }`} onClick={()=>toggleActive(user.id, user.transaction)}>
-            <div className=" font-bold text-green-900">{user.transaction} </div>
-            <div>{user.name}</div>
-            <div>{user.date}</div>
+          <div className={`users whitespace-nowrap ${isActive ? 'bg-emerald-100 translate-x-2' 
+          : 'bg-gray-50' }`} onClick={()=>toggleActive(user.id, user.transaction)}>
+            <div>
+              <div className=" font-semibold primary-color-text">{user.transaction} </div>
+              <div >{user.name}</div>
+            </div>
+            <div className="text-gray-500">{user.date}</div>
+            
           </div>
         )
-      })}
+      }) }
     </div>
     <div className="approvereject ">
   {selectedUser ? (
@@ -96,7 +106,7 @@ const [filter, setFilter] = useState('');
         {selectedUser.transaction}
       </h2>
 
-
+      <div className="border-orange-400 text-orange-700 bg-orange-100 w-fit px-3 border-2 rounded-2xl">{selectedUser.status}</div>
       <div className="flex flex-col gap-2 text-gray-700">
         <div className="flex justify-between">
           <span className="font-medium">Name:</span>
@@ -117,21 +127,21 @@ const [filter, setFilter] = useState('');
         <label htmlFor="purpose" className="block font-medium text-gray-700 mb-1">
           Purpose of Request
         </label>
-        <p id="purpose" className="bg-gray-100 p-3 rounded-md text-gray-800">
+        <p id="purpose" className="bg-white p-3 rounded-md text-gray-800">
           {selectedUser.purpose}
         </p>
       </div>
 
       <div className="mt-4 flex gap-4 relative">
-        <button className="flex-1 bg-green-800 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition" onClick={()=>handleClick(selectedUser.id, selectedUser.transaction, 'Approved')}>
+        <button className="flex-1 bg-green-800 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition active:scale-95" onClick={()=>handleClick(selectedUser.id, selectedUser.transaction, 'Approved')}>
           Approve
         </button>
-        <button className="flex-1 bg-red-700 hover:bg-red-600 text-white font-semibold py-2 rounded-lg transition"
+        <button className="flex-1 bg-red-700 hover:bg-red-600 text-white font-semibold py-2 rounded-lg transition active:scale-95"
          onClick={()=>handleClick(selectedUser.id, selectedUser.transaction, 'Rejected')}>
           Reject
         </button>
       </div>
-       {message && <p className="text-xs">{message}</p>}
+       {message && <p className="text-emerald-700 text-sm font-medium">{message}</p>}
     </div>
   ) : (
     <div className="text-gray-400 text-xl md:text-2xl text-center">

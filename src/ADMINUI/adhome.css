@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+.primary-color{
+  @apply bg-gradient-to-r from-emerald-700 to-teal-700;
+}
+.primary-color-text{
+  @apply bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent;
+}
+.icon-size{
+  @apply max-w-7 mr-1;
+}
+
+
 .navs{
   @apply fixed top-5 left-241 z-100 h-13 w-fit ;
 
@@ -9,24 +20,18 @@
   }
 }
 .bubbles{
-  @apply w-375 h-fit z-0 text-black flex justify-self-center justify-between mt-16 mb-2 ml-3 relative border-2 border-t-transparent
-  border-x-transparent p-3 px-20 shadow-xl;
+  @apply w-375 h-fit z-0 text-black flex justify-self-center justify-between mt-16 mb-2 ml-3 relative border border-emerald-200
+   p-3 px-20 shadow-md border-x-0 ; 
   button{
-    @apply   border-b-transparent p-2 flex justify-center items-center
-      cursor-pointer transition-colors duration-300;
+    @apply px-10 h-full rounded-3xl border-b-transparent p-2 flex justify-center items-center
+      cursor-pointer transition-colors duration-300 font-semibold;
   }
   
   
-}
-.dropdown{
-  @apply w-54 h-fit bg-white shadow-xl rounded-lg p-4 mt-1   ml-300 flex flex-col gap-2 absolute z-20;
-  li{
-    @apply text-black hover:bg-green-100 p-2 rounded-lg cursor-pointer;
-  }
 }
 .manageuser{
-  @apply w-360 h-150 flex justify-self-center bg-gray-50 rounded-lg mt-5 ml-3 flex flex-col border-green-600 border-2
-  overflow-y-auto gap-4 ;
+  @apply w-7xl h-150 flex justify-self-center  rounded-lg mt-5 ml-3 flex flex-col border-emerald-200 border-2 
+  overflow-y-auto gap-4 bg-white/90 backdrop-blur-2xl;
 }
 
 .mu{
@@ -61,16 +66,17 @@
 } 
 
 .requestees-container{
-  @apply flex justify-between gap-3 px-3;
+  @apply flex justify-between gap-0 px-3 h-full pb-3 ;
 .requestees{
-  @apply flex flex-col gap-3 max-h-130 w-full; 
+  @apply flex flex-col  overflow-y-auto  gap-3 max-h-130 w-full pr-5; 
   .users{
-    @apply  border-green-700 border-1 w-200 grid grid-cols-3 p-3 rounded-2xl text-black transition-all duration-300
-    shadow-lg
+    @apply border 
+     border-emerald-200 w-full flex justify-between p-3 pr-10  rounded-xl text-black transition-all duration-300
+    shadow-sm hover:shadow-md
   }
 }
 .approvereject{
-  @apply border-1 h-fit w-fit bg-emerald-100 shadow-lg rounded-xl p-6 w-full
+  @apply border-1 h-fit max-w-lg bg-emerald-100 shadow-lg rounded-xl p-6 w-full
 }
 }
 
@@ -88,8 +94,8 @@
 .records-div{
   @apply grid grid-cols-2 p-2 gap-x-2 gap-y-2  rounded-xl p-9;
   .record-info{
-  @apply bg-white rounded-2xl border-x-9 shadow-md p-4
-       flex justify-between items-center hover:border-y-1 transition-all duration-100 max-h-15;
+  @apply bg-white rounded-2xl border-x-9 shadow-md px-5 py-1
+        hover:border-y-1 transition-all duration-100;
 }
 }
 
@@ -107,5 +113,5 @@
   @apply flex items-center;
 }
 .make-announcement {
-  @apply  p-5 border rounded-xl bg-white shadow-sm w-full;
+  @apply  p-5 border rounded-xl bg-emerald-100 shadow-sm w-full;
 }

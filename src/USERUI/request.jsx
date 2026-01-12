@@ -3,6 +3,7 @@ function Requests(){
   const [transaction, setTransaction] = useState('');
   const [message, setMessage] = useState('ss');
   const [purpose, setPurpose] = useState('')
+  const [active, setActive] = useState(null);
   const user = JSON.parse(localStorage.getItem("user"));
 
   const handleClick = async () => {
@@ -44,16 +45,21 @@ function Requests(){
     setMessage(data.message);
   }
 };
-
+const cardClick =(card)=>{
+  setTransaction(card);
+  setActive(card);
+}
+const cards = ["KKID Card", "Proof of residency","Certificate of indigency", "Sedula", "Brgy. Clearance", "First job seeker"];
   return(
     <div className="request-body">
     <div className="request">
-      <button className="card" onClick={()=> setTransaction("KKID Card")}>KKID Card</button>
-      <button className="card" onClick={()=> setTransaction("Proof of residency")}>Proof of residency</button>
-      <button className="card" onClick={()=> setTransaction("Certificate of indigency")}>Certificate of Idigency</button>
-      <button className="card" onClick={()=> setTransaction("Sedula")}>Sedula</button>
-      <button className="card" onClick={()=> setTransaction("Brgy. Clearance")}>Brgy. Clearance</button>
-      <button className="card" onClick={()=> setTransaction("First job seeker")}>First job seeker</button>
+      {cards.map(c =>{
+        const isActive = active === c;
+        return(
+         <button className={`card relative  z-10 ${isActive?'primary-color text-white -translate-y-1.5' :'bg-gray-200 hover:-translate-y-0.5'}`} onClick={()=> cardClick(c)}>{c}</button>
+        )
+      })}
+      
     </div>
     <div className="request-secondbody">
     <div className="request-form">

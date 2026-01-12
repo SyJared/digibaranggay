@@ -8,27 +8,16 @@
 }
 
 .announcement{
-  @apply mx-auto w-200 max-h-75 overflow-y-scroll p-6 mt-20 bg-gray-100 rounded-xl shadow-2xl;
-  .announcementtitle{
-    @apply flex justify-self-center font-bold text-2xl mb-4 text-black;
-  }
-  .announcement-body{
-    @apply text-black flex justify-self-center;
-    p{
-    @apply inline-block text-center  text-lg w-180 h-fit text-gray-800;
-  }
-  }
-  .date{
-    @apply text-sm text-gray-600 mt-4;
-  }
+  @apply mx-auto w-200 max-h-75 overflow-y-scroll p-6 mt-20 bg-white/90 backdrop-blur-2xl rounded-xl shadow-2xl;
 }
 
 .request-body{
-  @apply w-fit h-85 mx-auto bg-gray-100 rounded-xl shadow-2xl;
+  @apply w-fit h-85 mx-auto bg-white/90 backdrop-blur-2xl rounded-xl shadow-2xl;
 .request{
   @apply  w-fit h-fit  mt-10  flex gap-0.5;
   .card{
-    @apply flex justify-self-center items-center bg-emerald-800 h-10 p-7 text-white p-2 hover:bg-green-700 cursor-pointer transition-all duration-300 hover:-translate-y-0.5;
+    @apply flex justify-self-center font-semibold items-center h-10 p-7 cursor-pointer transition-all duration-200 
+    ;
   }
 }
 .request-secondbody{

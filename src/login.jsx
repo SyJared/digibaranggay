@@ -38,16 +38,16 @@ function Login() {
         setMessage(data.user.message);
       }
     } catch (err) {
-      console.error("Fetch error:", err);
-      setMessage("Server error, please try again later.");
+      
+      setMessage('fetch error');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="back">
-      <span className="title">DigiBaranggay</span>
+    <div className="">
+     <span className="title ">DigiBaranggay</span>
       <span className="info">A web-based management information system for community records and document request</span>
       <div className="login">
         <form onSubmit={handleSubmit}>
@@ -65,13 +65,13 @@ function Login() {
             value={form.password}
             onChange={handleChange}
           />
-          {message && <p className="text-xl text-black">{message}</p>}
+          {message && <p className="text-md font-medium text-black text-center bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{message}</p>}
           <button className="loginb" type="submit" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
         <hr />
-        <span>If you don't have an account register now</span>
+        <span className="text-gray-700 ">If you don't have an account register now</span>
         <button className="registerb" onClick={navigateToRegister}>Register</button>
       </div>
     </div>

@@ -4,10 +4,11 @@ import Request from "./request";
 import profile from '../assets/user.png';
 import { useNavigate } from 'react-router-dom'; // ✅ corrected
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 function User() {
   const navigate = useNavigate();
+  
 
   // Protect page: redirect if not logged in
   useEffect(() => {

@@ -2,7 +2,16 @@ import React, { useState } from "react";
 import "./form.css";
 
 function Form() {
-  const [form, setForm] = useState({ firstname: "", middlename: "", lastname: "", email: "", password: "", address: "", birthdate: "" });
+  const [form, setForm] = useState(
+    { firstname: "",
+      middlename: "",
+      lastname: "",
+      email: "",
+      password: "",
+      address: "",
+      birthdate: "",
+      gender: ""}
+  );
   const [message, setMessage] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -35,7 +44,7 @@ function Form() {
       setMessage(data.message);
       
       if (data.success) {
-        setForm({ firstname: "", middlename: "", lastname: "", email: "", password: "", address: "", birthdate: ""});
+        setForm({ firstname: "", middlename: "", lastname: "", email: "", password: "", address: "", birthdate: "", gender: ""});
         setConfirmPassword("");
       }
     } catch (err) {
@@ -46,9 +55,9 @@ function Form() {
 
   return (
     <form className="form" onSubmit={handleSubmit}>
-      <h2 className="title">Register</h2>
+      <span className="title-register primary-color-text">Register</span>
 
-      <div className="fields">
+      <div className="fields label-form">
         <div>
           <label htmlFor="firstname">First Name *</label>
           <input id="firstName" name="firstname" value={form.firstname} onChange={handleChange} placeholder="Enter your first name" required />
@@ -90,7 +99,39 @@ function Form() {
         </div>
       </div>
 
-      <button className="submit" type="submit">Submit</button>
+      <div className="md:col-span-2">
+        <label className="block mb-2 label-form">Gender *</label>
+
+        <div className="flex gap-6 transition-all ">
+          <label className={`flex items-center gap-2 font-medium px-3 rounded-full duration-300
+            ${form.gender ==='Male' ?'text-white primary-color ' :'text-gray-800'}`}>
+            <input
+              type="radio"
+              name="gender"
+              value="Male"
+              checked={form.gender === "Male"}
+              onChange={handleChange}
+              required
+            />
+            Male
+          </label>
+
+          <label className={`flex items-center gap-2 font-medium px-3 rounded-full duration-300
+            ${form.gender ==='Female' ?'text-white primary-color ' :'text-gray-800'}`}>
+            <input
+              type="radio"
+              name="gender"
+              value="Female"
+              checked={form.gender === "Female"}
+              onChange={handleChange}
+            />
+            Female
+          </label>
+
+  </div>
+</div>
+
+      <button className="submit primary-color" type="submit">Submit</button>
 
       {message && <p className="message">{message}</p>}
     </form>
