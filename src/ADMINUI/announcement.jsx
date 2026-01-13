@@ -1,69 +1,131 @@
-import { useContext, useEffect, useState } from "react"
-import  {AnnouncementContext}  from "./announcementList";
+import { useContext, useReducer } from "react"
+import  { AnnouncementContext }  from "./announcementList";
+
+const initialState ={
+  activeId: null,
+  create: {title : "", body : ""},
+  edit: {id: "", title : "", body: ""},
+  feedback:{create:'', edit:'', remove:''},
+  error:{create:'', edit:'', remove:''}
+}
+
+const reducer = (state, action) =>{
+  switch(action.type){
+    case 'SET_ACTIVE':
+      return {
+        ...state,
+        activeId: action.payload?.id || null,
+        edit: action.payload ?{...action.payload}  : {id: "", title : "", body: ""},
+        feedback:{create:'', edit:'', remove:''}, error:{create:'', edit: '', remove:''}
+      }
+    case 'UPDATE_CREATE':
+      return{
+        ...state, create: {...state.create, ...action.payload}
+      }
+    case 'UPDATE_EDIT':
+      return{
+        ...state, edit: {...state.edit, ...action.payload}
+      }
+    case 'CREATE_SUCCESS':
+      return{
+        ...state,
+        create: {title : "", body : ""},
+        feedback: {...state.feedback, create: action.payload},
+        error: {...state.error, create: ''}
+      }
+      case 'EDIT_SUCCESS':
+        return{
+          ...state,
+          feedback:{...state.feedback, edit: action.payload},
+          error:{...state.error, edit: ''}
+        }
+      case 'REMOVE_SUCCESS':
+        return{
+          ...state,
+          activeId: null,
+          edit: {id: "", title : "", body: ""},
+          feedback:{...state.feedback, remove: action.payload},
+          error:{...state.error, remove: ''}
+        }
+      case 'SET_ERROR':
+        return{
+          ...state,
+          feedback:{create:'', edit:'', remove:''},
+          error:{...state.error, [action.payload.type]: action.payload.message}
+        }
+  }
+}
 function Announcement(){
   const {announcement, message, setMessage} =useContext(AnnouncementContext);
-  const [secondMessage, setSecondMessage] = useState('');
-  const [active, setActive] = useState(null);
-  const [createAnnouncement, setCreateAnnouncement] = useState({title : "", body : ""});
-  const [editAnnouncement, setEditAnnouncement] = useState({id: "", title : "", body: ""})
-  const [editMessage, setEditMessage] = useState('')
-
-  
+  const [state, dispatch] = useReducer(reducer, initialState);
  
   const handleClick =async ()=>{
     const formData = new FormData();
     formData.append("action", "create");
-    formData.append("title", createAnnouncement.title);
-    formData.append("body", createAnnouncement.body);
+    formData.append("title", state.create.title);
+    formData.append("body", state.create.body);
 
     const res =await fetch("http://localhost/digibaranggay/announcement.php",{
       method : "POST",
       body: formData
     })
     const data = await res.json();
-    setSecondMessage(data.secondmessage)
+    if(data.success){
+      dispatch({type: 'CREATE_SUCCESS', payload: data.message})
+    }else{
+      dispatch({type: 'SET_ERROR', payload: {type:'create', message: data.message}})
+    }
   }
-
-  const toggleActive = (id)=> setActive(active===id ?null :id );
-  const selectedUser = announcement.find(a=> a.id === active);
-   useEffect(()=>{
-    selectedUser && setEditAnnouncement({
-      id: selectedUser.id,
-      title: selectedUser.title,
-      body: selectedUser.body
+  
+const HandleRemoveClick = async()=>{
+    const formData = new FormData();
+    formData.append('action', 'remove');
+    formData.append('id', state.edit.id);
+    const res = await fetch("http://localhost/digibaranggay/announcement.php",{
+    method : "POST",
+    body : formData
     })
-  },[selectedUser])
+    const data = await res.json();
+    if(data.success){
+      dispatch({type:'REMOVE_SUCCESS', payload: data.message})
+    }else{
+      dispatch({type: 'SET_ERROR', payload: {type: 'remove', message: data.message}})
+    }
+}
+   
 
   const handleEditClick = async()=>{
     const formData = new FormData();
-    formData.append('action', 'edit')
-    formData.append('id', editAnnouncement.id);
-    formData.append('title', editAnnouncement.title);
-    formData.append('body', editAnnouncement.body);
+    formData.append('action', 'edit');
+    formData.append('id', state.edit.id);
+    formData.append('title', state.edit.title);
+    formData.append('body', state.edit.body);
 
     const res = await fetch("http://localhost/digibaranggay/announcement.php",{
     method : "POST",
     body : formData
     })
     const data = await res.json();
-    setEditMessage(data.editmessage)
+    if(data.success){
+      dispatch({type: 'EDIT_SUCCESS', payload: data.message})
+      
+    }else{
+      dispatch({type: 'SET_ERROR', payload: {type:'edit', message: data.message}})
+    }
   }
-  
+  const isEditing = !!state.activeId;
 
   return (
   <div className="announcement-div">
     <div className="existing-announcement no-scrollbar">
-      {message && (
-        <p className="text-sm text-emerald-700 mb-2">{message}</p>
-      )}
-
+      {message && <p className="text-rose-600">{message}</p>}
       {announcement.map(a => {
-        const isActive = active === a.id;
+        const isActive = state.activeId === a.id;
 
         return (
           <div key={a.id} className={`ann-title-date`}>
             <div
-              className="ann cursor-pointer" onClick={() => toggleActive(a.id)}>
+              className="ann cursor-pointer" onClick={()=>dispatch({type: 'SET_ACTIVE', payload: isActive ? null : a})}>
               <div>
                 <h3 className="text-lg font-semibold text-green-900">
                   {a.title}
@@ -85,18 +147,19 @@ function Announcement(){
       })}
     </div>
 
-    {selectedUser 
+    {isEditing
     ? <div className="make-announcement space-y-8 text-gray-700">
-      <div><h2 className="text-emerald-900  font-semibold text-3xl">Edit {selectedUser.title}</h2></div>
+      <div><h2 className="text-emerald-900  font-semibold text-3xl">Edit {state.edit.title}</h2></div>
       <div className="flex flex-col">
         <label className="text-emerald-800  font-semibold">Title</label>
         <input type="text" className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2
-         focus:outline-none focus:ring-2 focus:ring-teal-600" value={editAnnouncement.title} 
-         onChange={(e)=>setEditAnnouncement({...editAnnouncement, title: e.target.value})}/>
+         focus:outline-none focus:ring-2 focus:ring-teal-600" value={state.edit.title} 
+         onChange={(e)=>dispatch({type: 'UPDATE_EDIT', payload: {title: e.target.value}})}/>
       </div>
       <div className="flex flex-col">
         <label className="text-emerald-800  font-semibold">Body</label>
-        <textarea value={editAnnouncement.body} onChange={(e)=>setEditAnnouncement({...editAnnouncement, body: e.target.value})} className="bg-gray-50 border border-gray-300 rounded-lg p-3 h-40 resize-none
+        <textarea value={state.edit.body} 
+        onChange={(e)=>dispatch({type:'UPDATE_EDIT', payload: {body: e.target.value}})} className="bg-gray-50 border border-gray-300 rounded-lg p-3 h-40 resize-none
            focus:outline-none focus:ring-2 focus:ring-teal-600" />
       </div>
       <div className="space-x-5">
@@ -105,10 +168,13 @@ function Announcement(){
          active:scale-95" onClick={()=>handleEditClick()}> Edit Announcement
       </button>
       <button className="bg-rose-600 text-white px-8 py-2 rounded-lg hover:bg-rose-700 transition-all duration-200
-      active:scale-95">
+      active:scale-95" onClick={()=>HandleRemoveClick()}>
         Remove this announcement
       </button>
-      {editMessage && <p className="primary-color-text font-semibold">{editMessage}</p>}
+      {state.feedback.remove && <div className="primary-color-text font-semibold text-sm">{state.feedback.remove}</div>}
+      {state.error.remove && <div className="text-rose-600 font-semibold text-sm">{state.error.remove}</div>}
+      {state.feedback.edit && <div className="primary-color-text font-semibold text-sm">{state.feedback.edit}</div>}
+      {state.error.edit && <div className="text-rose-600 font-semibold text-sm">{state.error.edit}</div>}
       </div>
      </div> 
       
@@ -123,19 +189,19 @@ function Announcement(){
         <label className="font-semibold text-emerald-800">
         Announcement Title
         </label>
-        <input type="text" placeholder="Enter title..." name="title" value={createAnnouncement.title}
+        <input type="text" placeholder="Enter title..." value={state.create.title}
         className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2
          focus:outline-none focus:ring-2 focus:ring-teal-600"
-         onChange={(e)=>setCreateAnnouncement({...createAnnouncement, [e.target.name]:e.target.value})}/>
+         onChange={(e)=>dispatch({type:'UPDATE_CREATE', payload:{title: e.target.value}})}/>
       </div>
 
       <div className="flex flex-col gap-2">
         <label className="font-semibold text-emerald-800"> Announcement Body</label>
 
-        <textarea name="body" id="body" placeholder="Write your announcement here..." value={createAnnouncement.body}
+        <textarea placeholder="Write your announcement here..." value={state.create.body}
           className="bg-gray-50 border border-gray-300 rounded-lg p-3 h-40 resize-none
            focus:outline-none focus:ring-2 focus:ring-teal-600" 
-           onChange={(e)=>setCreateAnnouncement({...createAnnouncement, [e.target.name]:e.target.value})} />
+           onChange={(e)=>dispatch({type: 'UPDATE_CREATE', payload: {body: e.target.value}})} />
       </div>
 
     <div className="flex items-center gap-4 pt-4">
@@ -143,9 +209,8 @@ function Announcement(){
         className="bg-emerald-700 text-white px-8 py-2 rounded-lg hover:bg-emerald-800 transition-all duration-200
          active:scale-95" onClick={()=>handleClick()}> Post Announcement
       </button>
-
-      <p className="primary-color-text">{secondMessage ?secondMessage : ''}</p>
-
+      {state.feedback.create && <div className="primary-color-text font-semibold text-sm">{state.feedback.create}</div>}
+      {state.error.create && <div className="text-rose-600 font-semibold text-sm">{state.error.create }</div>}
     </div>
   </div>
 </div>}
