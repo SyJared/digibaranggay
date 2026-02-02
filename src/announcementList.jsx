@@ -7,6 +7,7 @@ export const AnnouncementContext = createContext({
 });
 
 export function AnnouncementList({children}){
+  
   const [announcement, setAnnouncement] = useState([]);
   const [message, setMessage] = useState('')
 

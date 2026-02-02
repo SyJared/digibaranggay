@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+.head {
+  @apply bg-white/90 backdrop-blur
+         w-full h-17 flex fixed top-0 left-0 z-50 flex justify-between
+         shadow-sm px-10 border-b border-b-2 border-green-200;
+}
+
+.head span {
+  @apply bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent  text-2xl font-semibold tracking-tight h-fit my-auto;
+}
+.header-icon{
+  @apply max-w-6;
+  width: 24px;
+  height: 24px;
+  filter: invert(100%);
+}
+.header-button{
+  @apply px-10 py-2 rounded-xl flex;
+}

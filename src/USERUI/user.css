@@ -1,5 +1,18 @@
 @import "tailwindcss";
-
+ @keyframes slideRight {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(8px); }
+}
+.animate-slide-right {
+          animation: slideRight 2s ease-in-out infinite;
+}
+      
+.next-prev-buttons{
+  @apply w-7 hover:cursor-pointer border-1 px-1 py-2 border-emerald-600 hover:bg-emerald-600 transition-all duration-200 rounded-lg
+  active:scale-90;
+  filter: invert(32%) sepia(88%) saturate(500%) hue-rotate(120deg) brightness(90%);
+  
+}
 .nav{
   @apply fixed top-0.5 left-310 z-100 h-13 w-fit gap-10 flex;
   span{
@@ -7,46 +20,24 @@
   }
 }
 
-.announcement{
-  @apply mx-auto w-200 max-h-75 overflow-y-scroll p-6 mt-20 bg-white/90 backdrop-blur-2xl rounded-xl shadow-2xl;
+.announcement {
+  @apply mx-auto 
+    max-w-[900px] 
+    w-full
+    mt-16
+    bg-white
+    rounded-xl
+    shadow-xl
+    border border-emerald-50
+    px-6 py-5
+    backdrop-blur-lg
+    transition-all duration-300;
 }
 
-.request-body{
-  @apply w-fit h-85 mx-auto bg-white/90 backdrop-blur-2xl rounded-xl shadow-2xl;
-.request{
-  @apply  w-fit h-fit  mt-10  flex gap-0.5;
-  .card{
-    @apply flex justify-self-center font-semibold items-center h-10 p-7 cursor-pointer transition-all duration-200 
-    ;
-  }
-}
-.request-secondbody{
-  @apply  w-240 h-fit  pl-5 pr-5  flex justify-between;
-  .request-form{
-    @apply flex flex-col m-5 gap-0.5 w-100 text-black ;
-    h1{
-    @apply font-bold text-xl mb-4 text-green-700;
-  }
-  textarea{
-    @apply bg-white border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2
-     focus:ring-green-600 mb-2 w-80;
-  }
-  p{
-    @apply text-sm text-gray-600 mb-2 w-70;
-  }
-  button{
-    @apply bg-green-700 w-30 text-white p-1  mt-2;
-  }
-  }
-  .request-info{
-    @apply flex flex-col m-5 gap-7 w-100;
-    .userinfo{
-      @apply text-green-700 font-bold text-sm
-    }
-    span{
-      @apply text-black text-xs ml-2
-    }
-   
-  }
-}
+
+
+
+.icon-transaction{
+  @apply w-10;
+  filter: invert(100%);
 }

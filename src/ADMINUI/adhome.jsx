@@ -1,76 +1,81 @@
-import "./adhome.css";
-import { act, useState } from "react";
+import { useContext, useState } from "react";
 import Manageusers from "./manageusers";
 import Requestees from "./requestees";
 import Records from "./records";
 import Announcement from "./announcement";
-import requestIcon from '../assets/application.png'
-import megaphone from '../assets/megaphone.png'
-import management from '../assets/management.png';
-import records from '../assets/edit.png';
+
+import { Newspaper, Megaphone, Users, FileText } from "lucide-react"; // Lucide icons
+import { RequestContext } from "../requestList";
+import StatCard from "./overview";
+import { AnnouncementContext } from "../announcementList";
 
 function Adhome() {
-  const [active, setActive] = useState(""); // currently active main or dropdown item
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const {users} = useContext(RequestContext);
+  const {announcement} = useContext(AnnouncementContext)
 
-  // Handle clicking a main button
+  const [active, setActive] = useState("");
+
   const handleMainClick = (item) => {
-    if (item === "Documents") {
-      setIsDropdownOpen(!isDropdownOpen); // toggle dropdown
-    } else {
-      setActive(item);
-      setIsDropdownOpen(false); // close dropdown if any other item clicked
-    }
-  };
-
-  // Handle clicking a dropdown item
-  const handleDropdownClick = (item) => {
     setActive(item);
-    setIsDropdownOpen(false);
   };
 
   return (
-    <div className="">
-      <div className="navs">
-        <span>to be coded</span>
+    <div className="min-h-screen bg-white p-6 mt-16">
+
+      {/* NAV PANEL — Full width buttons */}
+      <div className="flex gap-4 mb-6">
+        {[
+          { name: "Requests", icon: Newspaper },
+          { name: "Make announcement", icon: Megaphone },
+          { name: "Manage Users", icon: Users },
+          { name: "Records", icon: FileText },
+        ].map((nav) => (
+          <button
+            key={nav.name}
+            onClick={() => handleMainClick(nav.name)}
+            className={`flex items-center gap-3 px-6 py-4 rounded-xl text-sm font-semibold justify-center transition-colors w-full ${
+              active === nav.name
+                ? "bg-gradient-to-br from-teal-600 to-teal-700 text-white shadow-lg scale-105 ring-2 ring-offset-2 ring-teal-500"
+                : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+            }`}
+          >
+            <nav.icon className="w-6 h-6" /> {/* Use Lucide icon as component */}
+            {nav.name}
+          </button>
+        ))}
       </div>
 
-      <div className="bubbles">
-        
-        
-        <button
-          onClick={() => handleMainClick("Requests")}
-          className={active === "Requests" ? "primary-color text-white" : ""}
-        >
-          <img src={requestIcon} alt="" className="icon-size" />Requests
-        </button>
-        <button
-          onClick={() => handleMainClick("Make announcement")}
-          className={active === "Make announcement" ? "primary-color text-white" : ""}
-        >
-          <img src={megaphone} alt="" className="icon-size" />Make announcement
-        </button>
-        <button
-          onClick={() => handleMainClick("Manage Users")}
-          className={active === "Manage Users" ? "primary-color text-white" : ""}
-        >
-          <img src={management} alt="" className="icon-size" />Manage Users
-        </button>
-        <button
-          onClick={() => handleMainClick("Records")}
-          className={active === "Records" ? "primary-color text-white" : ""}
-        >
-          <img src={records} alt="" className="icon-size" />Records
-        </button>
-        
+      {/* SECTION OVERVIEW / ANALYTICS — smaller and themed */}
+      {active === "Requests" && (
+      <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-6 max-w-[300px] mx-auto">
+        <StatCard label="Total" value={users.length} />
       </div>
+        )}
 
-      <div className="manageuser">
-       {active === "Manage Users" && <Manageusers />}
-       {active === "Requests" && <Requestees />}
-       {active ==="Records" && <Records />}
-       {active === "Make announcement" && <Announcement />}
-       </div>
+        {active === "Make announcement" && (
+      <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-6 max-w-[300px] mx-auto">
+        <StatCard label="Total" value={announcement.length} />
+      </div>
+        )}
+
+        {active === "Manage Users" && (
+      <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-6 max-w-[300px] mx-auto">
+        <StatCard label="Total" value={announcement.length} />
+      </div>
+        )}
+
+      {/* MAIN CONTENT */}
+      <div className="bg-gray-50 border-e-3 border-l-3 shadow-md border-teal-800 rounded-xl  overflow-scroll no-scrollbar mx-20 max-h-[600px]">
+        {active === "Manage Users" && <Manageusers />}
+        {active === "Requests" && <Requestees />}
+        {active === "Records" && <Records />}
+        {active === "Make announcement" && <Announcement />}
+        {!active && (
+          <div className="text-center text-gray-500 text-lg">
+            Select a section from the nav above to see overview and content.
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useContext, useReducer } from "react"
-import  { AnnouncementContext }  from "./announcementList";
+import  { AnnouncementContext }  from "../announcementList";
 
 const initialState ={
   activeId: null,
@@ -113,7 +113,7 @@ const HandleRemoveClick = async()=>{
       dispatch({type: 'SET_ERROR', payload: {type:'edit', message: data.message}})
     }
   }
-  const isEditing = !!state.activeId;
+  const isEditing = state.activeId;
 
   return (
   <div className="announcement-div">
@@ -127,10 +127,10 @@ const HandleRemoveClick = async()=>{
             <div
               className="ann cursor-pointer" onClick={()=>dispatch({type: 'SET_ACTIVE', payload: isActive ? null : a})}>
               <div>
-                <h3 className="text-lg font-semibold text-green-900">
+                <h3 className="text-lg font-semibold ">
                   {a.title}
                 </h3>
-                <p className="text-xs text-emerald-700">
+                <p className="text-xs text-gray-500">
                   {a.date}
                 </p>
               </div>
@@ -148,18 +148,18 @@ const HandleRemoveClick = async()=>{
     </div>
 
     {isEditing
-    ? <div className="make-announcement space-y-8 text-gray-700">
-      <div><h2 className="text-emerald-900  font-semibold text-3xl">Edit {state.edit.title}</h2></div>
+    ? <div className="make-announcement space-y-8 ">
+      <div><h2 className="  font-semibold text-3xl">Edit {state.edit.title}</h2></div>
       <div className="flex flex-col">
-        <label className="text-emerald-800  font-semibold">Title</label>
-        <input type="text" className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2
+        <label className="text-gray-800  font-medium">Title</label>
+        <input type="text" className="bg-gray-100 border border-gray-300 rounded-lg px-3 py-2
          focus:outline-none focus:ring-2 focus:ring-teal-600" value={state.edit.title} 
          onChange={(e)=>dispatch({type: 'UPDATE_EDIT', payload: {title: e.target.value}})}/>
       </div>
       <div className="flex flex-col">
-        <label className="text-emerald-800  font-semibold">Body</label>
+        <label className="text-gray-800  font-medium">Body</label>
         <textarea value={state.edit.body} 
-        onChange={(e)=>dispatch({type:'UPDATE_EDIT', payload: {body: e.target.value}})} className="bg-gray-50 border border-gray-300 rounded-lg p-3 h-40 resize-none
+        onChange={(e)=>dispatch({type:'UPDATE_EDIT', payload: {body: e.target.value}})} className="bg-gray-100 border border-gray-300 rounded-lg p-3 h-40 resize-none
            focus:outline-none focus:ring-2 focus:ring-teal-600" />
       </div>
       <div className="space-x-5">
@@ -179,27 +179,27 @@ const HandleRemoveClick = async()=>{
      </div> 
       
       : <div className="make-announcement max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6">
-      <h2 className="text-3xl font-semibold text-emerald-900 mb-6">
+      <h2 className="text-3xl font-semibold text-black mb-6">
       Create Announcement
       </h2>
 
       <div className="space-y-5 text-gray-700">
     
         <div className="flex flex-col gap-2">
-        <label className="font-semibold text-emerald-800">
+        <label className="text-gray-700  font-medium">
         Announcement Title
         </label>
         <input type="text" placeholder="Enter title..." value={state.create.title}
-        className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2
+        className="bg-gray-100 border border-gray-300 rounded-lg px-3 py-2
          focus:outline-none focus:ring-2 focus:ring-teal-600"
          onChange={(e)=>dispatch({type:'UPDATE_CREATE', payload:{title: e.target.value}})}/>
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="font-semibold text-emerald-800"> Announcement Body</label>
+        <label className="text-gray-700  font-medium"> Announcement Body</label>
 
         <textarea placeholder="Write your announcement here..." value={state.create.body}
-          className="bg-gray-50 border border-gray-300 rounded-lg p-3 h-40 resize-none
+          className="bg-gray-100 border border-gray-300 rounded-lg p-3 h-40 resize-none
            focus:outline-none focus:ring-2 focus:ring-teal-600" 
            onChange={(e)=>dispatch({type: 'UPDATE_CREATE', payload: {body: e.target.value}})} />
       </div>
