@@ -27,7 +27,8 @@ function Requestees() {
           prevUsers.map((u) =>
             u.id === id && u.transaction === transaction ? { ...u, status } : u
           )
-        );
+        )
+        
       } else {
         setActionError(data.message);
       }
@@ -45,6 +46,18 @@ function Requestees() {
       setActive({ id, transaction });
     }
   };
+  const payment = {
+  'KKID Card': 0.00,
+  'Brgy. clearance': 50.00,
+  'Certificate of indigency': 0.00,
+  'Barangay ID': 50.00,
+  'Working clearance': 50.00,
+  'OSCA': 0.00,
+  'First job seeker': 0.00,
+  'Barangay inhabitants':0.00
+};
+
+const price =(transaction)=> payment[transaction]; 
 
   const filteredPending = users.filter(
     (user) => (!filter || user.transaction === filter) && user.status === "Pending"
@@ -157,7 +170,8 @@ function Requestees() {
                   <label className="block font-medium text-gray-700 mb-1">Payment Amount</label>
                   <input
                     type="number"
-                    placeholder="₱0.00"
+                    placeholder={`₱`}
+                    value={`${price(selectedUser.transaction)}`}
                     className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
                     onChange={(e) => setUpdate((u) => ({ ...u, pay: e.target.value }))}
                   />

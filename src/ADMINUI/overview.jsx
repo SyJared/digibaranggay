@@ -1,25 +1,31 @@
-function StatCard({ label, value, maxBubbles = 10 }) {
-
-  const bubbleCount = Math.min(value, maxBubbles);
+function StatCard({ label, value, tone = "teal" }) {
+  // Harmonized colors
+  const tones = {
+    teal: "bg-teal-600",       // primary accent
+    emerald: "bg-emerald-500", // secondary accent
+    slate: "bg-slate-600",     // neutral / total
+    amber: "bg-amber-500",     // pending / warning
+    red: "bg-red-600",         // rejected / error
+    purple: "bg-purple-600",   // expired / less important
+    pink: "bg-pink-500"        // female / gender
+  };
 
   return (
-    <div className="bg-gray-100 text-gray-800 rounded-xl p-4 shadow-md flex flex-col gap-3">
+    <div className="bg-white rounded-xl shadow-md border border-slate-200 p-5 hover:shadow-lg transition-transform transform hover:-translate-y-1">
       
-      <div className="flex justify-between items-center">
-        <p className="text-sm opacity-80 capitalize">{label}</p>
-        <p className="text-2xl font-bold">{value}</p>
-      </div>
+      {/* Label */}
+      <p className="text-sm text-slate-500 font-medium">{label}</p>
+      
+      {/* Value */}
+      <p className="text-3xl font-bold text-slate-900 mt-1">{value}</p>
 
-      {/* bubbles */}
-      <div className="flex gap-1 flex-wrap">
-        {Array.from({ length: bubbleCount }).map((_, i) => (
-          <span
-            key={i}
-            className="w-3 h-3 rounded-full bg-teal-600"
-          />
-        ))}
+      {/* Accent bar */}
+      <div className="h-2 w-full bg-slate-100 rounded-full mt-3">
+        <div
+          className={`${tones[tone]} h-2 rounded-full transition-all duration-500`}
+          style={{ width: `${Math.min(value * 10, 100)}%` }}
+        />
       </div>
-
     </div>
   );
 }

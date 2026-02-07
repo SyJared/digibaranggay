@@ -13,7 +13,7 @@ function HeaderRequests() {
   const [activeFilter, setActiveFilter] = useState("All");
   const dropdownRef = useRef(null);
 
-  const filters = ["All", "Pending", "Rejected", "Approved"];
+  const filters = ["All", "Pending", "Rejected", "Approved", "Expired"];
 
 
   useEffect(() => {

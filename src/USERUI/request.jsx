@@ -44,7 +44,7 @@ function Requests(){
     console.log("Response from PHP:", data);
 
     if (data.success) {
-      setMessage(data.message);
+      setMessage(data.message); 
     } else {
       setMessage(data.message || "Something went wrong");
     }
@@ -70,7 +70,7 @@ const payment = {
   'Brgy. clearance': 50.00,
   'Certificate of indigency': 0.00,
   'Barangay ID': 50.00,
-  'Working clearance': 0.00,
+  'Working clearance': 50.00,
   'OSCA': 0.00,
   'First job seeker': 0.00,
   'Barangay inhabitants':0.00
@@ -165,8 +165,9 @@ const handleVerify = () => {
           className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-600 text-gray-800"
         />
         <p className="text-sm text-gray-500">
-          {`${payment[transaction]} `}
+          Payment: P{`${payment[transaction]} `}
         </p>
+        {transaction === 'KKID Card' && <div className="flex align-middle space-x-2"><input type="checkbox" className="size-4.5 focus:outline-0" /><p className="text-[14px] font-medium my-auto text-gray-600 ">Do you have valid ID</p> <a href="" className="primary-color-text font-medium text-[14px] ml-2">Insert here</a></div>}
       </div>
 
       <div className="flex flex-col gap-3">
