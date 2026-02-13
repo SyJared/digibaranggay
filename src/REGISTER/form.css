@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 .form{
-  @apply flex flex-col text-white border  w-full max-w-lg bg-gray-100 rounded-xl py-6 px-6 mx-auto mt-28 shadow-2xl;
+  @apply flex flex-col text-white border  w-full max-w-lg bg-gray-100 rounded-xl py-6 px-6 mx-auto mt-20 shadow-2xl;
   .label-form{
     @apply text-gray-700 font-semibold mt-1 mb-1;
   }
@@ -26,4 +26,3 @@
     @apply  w-full text-white p-2 rounded-xl mt-6;
   }
 }
-

@@ -5,6 +5,7 @@ import { RoleContext } from "../rolecontext";
 import HeaderRequests from "./headerrequests";
 import Profile from "./profile";
 import { RequestContext } from "../requestList";
+import NotificationBell from "./notif";
 
 function Header() {
   const {user} =useContext(RequestContext);
@@ -44,6 +45,7 @@ console.log(role);
 
       {role === 'admin' && (
         <div className="flex items-center gap-6">
+          <NotificationBell />
           <button
             className="text-gray-700 hover:text-red-600 transition font-medium flex items-center gap-2"
             onClick={handleLogout}

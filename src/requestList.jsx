@@ -28,7 +28,7 @@ export function RequestProvider({ children }) {
   useEffect(() => {
     fetchRequests();
 
-    const interval = setInterval(fetchRequests, 15000); // fetch every 15 seconds
+    const interval = setInterval(fetchRequests, 5000); // fetch every 15 seconds
 
     return () => clearInterval(interval); // cleanup on unmount
   }, []);

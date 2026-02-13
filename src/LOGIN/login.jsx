@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import { RoleContext } from "../rolecontext";
+import { RegisteredContext } from "../registeredContext";
 
 function Login() {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ function Login() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const { role, setRole } = useContext(RoleContext);
+  const {registered} = useContext(RegisteredContext)
 
   const navigateToRegister = () => navigate("/REGISTER/register");
 
@@ -15,45 +17,55 @@ function Login() {
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!form.email || !form.password) {
-      setMessage("Please fill in all fields");
-      return;
-    }
+  if (!form.email || !form.password) {
+    setMessage("Please fill in all fields");
+    return;
+  }
 
-    setLoading(true);
-    setMessage("");
+  setLoading(true);
+  setMessage("");
 
-    try {
-      const res = await fetch("http://localhost/digibaranggay/login.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: form.email,
-          password: form.password,
-        }),
-      });
+  try {
+    const res = await fetch("http://localhost/digibaranggay/login.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: form.email,
+        password: form.password,
+      }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (data.success) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-        setRole(data.user.role);
-        navigate(
-          data.user.role === "admin"
-            ? "/ADMINUI/adhome"
-            : "/USERUI/user"
-        );
-      } else {
-        setMessage(data.message);
+    if (data.success) {
+      // Check user status
+      if (data.user.status !== "Accepted") {
+        setMessage("Your account is not approved yet. Please wait for approval.");
+        setLoading(false);
+        return;
       }
-    } catch (err) {
-      setMessage(err.message);
-    } finally {
-      setLoading(false);
+
+      // If accepted, proceed
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setRole(data.user.role);
+      navigate(
+        data.user.role === "admin"
+          ? "/ADMINUI/adhome"
+          : "/USERUI/user"
+      );
+
+    } else {
+      setMessage(data.message);
     }
-  };
+  } catch (err) {
+    setMessage(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen grid grid-cols-1 md:grid-cols-3 bg-gray-100">
@@ -136,13 +148,15 @@ function Login() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
           <div className="bg-white/15 backdrop-blur rounded-xl p-6">
             <p className="text-sm opacity-80">Estimated Population</p>
-            <p className="text-3xl font-bold">12,480</p>
+            <p className="text-3xl font-bold">6000+</p>
           </div>
 
           <div className="bg-white/15 backdrop-blur rounded-xl p-6">
-            <p className="text-sm opacity-80">Registered Residents</p>
-            <p className="text-3xl font-bold">3,912</p>
-          </div>
+  <p className="text-sm opacity-80">Registered Residents</p>
+  <p className="text-3xl font-bold">
+    {registered.filter((u) => u.status === "Accepted").length}
+  </p>
+</div>
 
           <div className="bg-white/15 backdrop-blur rounded-xl p-6">
             <p className="text-sm opacity-80">Successful requests</p>
