@@ -35,7 +35,8 @@ function Requests(){
         body: JSON.stringify({
           transaction,
           purpose,
-          user
+          user,
+          payment: payment[transaction] // <-- Include payment here
         }),
       }
     );
@@ -54,6 +55,7 @@ function Requests(){
     setMessage(error.message);
   }
 };
+
 const cardClick =(card)=>{
   setTransaction(card);
   setActive(card);
@@ -165,8 +167,9 @@ const handleVerify = () => {
           className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-600 text-gray-800"
         />
         <p className="text-sm text-gray-500">
-          Payment: P{`${payment[transaction]} `}
-        </p>
+  Payment: {payment[transaction] === 0 ? "FREE" : `₱${payment[transaction]}`}
+</p>
+
         {transaction === 'KKID Card' && <div className="flex align-middle space-x-2"><input type="checkbox" className="size-4.5 focus:outline-0" /><p className="text-[14px] font-medium my-auto text-gray-600 ">Do you have valid ID</p> <a href="" className="primary-color-text font-medium text-[14px] ml-2">Insert here</a></div>}
       </div>
 

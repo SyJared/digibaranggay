@@ -4,6 +4,7 @@ import { RegisteredContext } from "../registeredContext";
 function ManageUsers() {
   const [expandedUserId, setExpandedUserId] = useState(null);
   const [filterStatus, setFilterStatus] = useState("Pending");
+  const [searchQuery, setSearchQuery] = useState("");
   const { registered, error } = useContext(RegisteredContext);
 
   const [userStatuses, setUserStatuses] = useState(
@@ -13,7 +14,6 @@ function ManageUsers() {
     }, {})
   );
 
-  // Modal state
   const [showModal, setShowModal] = useState(false);
   const [modalUser, setModalUser] = useState(null);
   const [modalAction, setModalAction] = useState("");
@@ -21,8 +21,6 @@ function ManageUsers() {
   const toggleExpand = (id) => setExpandedUserId(expandedUserId === id ? null : id);
 
   const statuses = ["Pending", "Rejected", "Accepted"];
-
-  const filteredUsers = registered.filter((r) => userStatuses[r.id] === filterStatus);
 
   const openModal = (user, action) => {
     setModalUser(user);
@@ -52,6 +50,17 @@ function ManageUsers() {
     }
   };
 
+  // Filtered + searched users
+  const filteredUsers = registered
+    .filter((r) => userStatuses[r.id] === filterStatus)
+    .filter((r) => {
+      const fullName = `${r.firstname} ${r.middlename} ${r.lastname}`.toLowerCase();
+      return (
+        fullName.includes(searchQuery.toLowerCase()) ||
+        r.email.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    });
+
   return (
     <div className="flex flex-col gap-4 p-6 md:p-9 bg-gradient-to-br from-slate-50 to-slate-100 max-h-max">
       
@@ -61,21 +70,33 @@ function ManageUsers() {
         </p>
       )}
 
-      {/* Status Filter */}
-      <div className="flex gap-3 mb-4">
-        {statuses.map((status) => (
-          <button
-            key={status}
-            onClick={() => setFilterStatus(status)}
-            className={`px-4 py-2 rounded-lg font-medium transition
-              ${filterStatus === status
-                ? "bg-emerald-600 text-white"
-                : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-100"
-              }`}
-          >
-            {status}
-          </button>
-        ))}
+      {/* Sticky Filters + Search */}
+      <div className="sticky top-0 z-20 bg-slate-50 p-4 flex flex-col md:flex-row gap-4 border-b border-slate-200">
+        {/* Status Filter */}
+        <div className="flex gap-3 flex-wrap">
+          {statuses.map((status) => (
+            <button
+              key={status}
+              onClick={() => setFilterStatus(status)}
+              className={`px-4 py-2 rounded-lg font-medium transition
+                ${filterStatus === status
+                  ? "bg-emerald-600 text-white"
+                  : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-100"
+                }`}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+
+        {/* Search Bar */}
+        <input
+          type="text"
+          placeholder="Search by name or email..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="flex-1 border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        />
       </div>
 
       {/* User List */}
@@ -86,7 +107,7 @@ function ManageUsers() {
         return (
           <div
             key={r.id}
-            className={`bg-white rounded-lg overflow-hidden shadow-sm border border-slate-200 transition-all duration-300 cursor-pointer hover:shadow-md hover:border-emerald-600 ${
+            className={`bg-white mx-5 rounded-lg overflow-hidden shadow-sm border border-slate-200 transition-all duration-300 cursor-pointer hover:shadow-md hover:border-emerald-600 ${
               isExpanded ? "shadow-md border-emerald-600" : ""
             }`}
             onClick={() => toggleExpand(r.id)}
@@ -115,6 +136,7 @@ function ManageUsers() {
                 <InfoRow label="Contact Number" value={r.contactnumber} />
                 <InfoRow label="Civil Status" value={r.civilstatus} />
                 <InfoRow label="Role" value={r.role} />
+                <InfoRow label="Household Number" value={r.housenumber} />
                 <InfoRow label="Date Registered" value={r.dateregistered} />
                 <InfoRow label="Status" value={status} />
 
@@ -150,7 +172,7 @@ function ManageUsers() {
         <div className="fixed inset-0 bg-white/10 backdrop-blur-xl bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-96 shadow-xl text-center">
             <h2 className="text-xl font-semibold mb-4">
-              Are you sure you want to accept this account?
+              Are you sure you want to {modalAction.toLowerCase()} this account?
             </h2>
             <p className="text-gray-700 mb-6">
               {modalUser.firstname} {modalUser.middlename} {modalUser.lastname}

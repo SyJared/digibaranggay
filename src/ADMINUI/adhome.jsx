@@ -9,6 +9,7 @@ import { RequestContext } from "../requestList";
 import StatCard from "./overview";
 import { AnnouncementContext } from "../announcementList";
 import { RegisteredContext } from "../registeredContext";
+import ActivityHeatmap from "./activityHeatMap";
 
 function Adhome() {
   const {users} = useContext(RequestContext);
@@ -51,8 +52,9 @@ function Adhome() {
 
      
       {active === "Requests" && (
-      <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-6 max-w-[300px] mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 max-w-[600px] mx-auto">
         <StatCard label="Total" value={users.length} />
+        <ActivityHeatmap users={users} days={30} />
       </div>
         )}
 

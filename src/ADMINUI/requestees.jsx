@@ -46,18 +46,7 @@ function Requestees() {
       setActive({ id, transaction });
     }
   };
-  const payment = {
-  'KKID Card': 0.00,
-  'Brgy. clearance': 50.00,
-  'Certificate of indigency': 0.00,
-  'Barangay ID': 50.00,
-  'Working clearance': 50.00,
-  'OSCA': 0.00,
-  'First job seeker': 0.00,
-  'Barangay inhabitants':0.00
-};
 
-const price =(transaction)=> payment[transaction]; 
 
   const filteredPending = users.filter(
     (user) => (!filter || user.transaction === filter) && user.status === "Pending"
@@ -165,27 +154,24 @@ const price =(transaction)=> payment[transaction];
                 <p className="bg-teal-50 p-3 rounded-md border text-teal-800">{selectedUser.purpose}</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-medium text-gray-700 mb-1">Payment Amount</label>
-                  <input
-                    type="number"
-                    placeholder={`₱`}
-                    value={`${price(selectedUser.transaction)}`}
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    onChange={(e) => setUpdate((u) => ({ ...u, pay: e.target.value }))}
-                  />
-                </div>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+  <div>
+    <label className="block font-medium text-gray-700 mb-1">Payment Amount</label>
+    <p className="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-800">
+      ₱{selectedUser.pay ?? 0}  {/* Use the pay from the table */}
+    </p>
+  </div>
 
-                <div>
-                  <label className="block font-medium text-gray-700 mb-1">Pick-up Date</label>
-                  <input
-                    type="date"
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    onChange={(e) => setUpdate((u) => ({ ...u, pickup: e.target.value }))}
-                  />
-                </div>
-              </div>
+  <div>
+    <label className="block font-medium text-gray-700 mb-1">Pick-up Date</label>
+    <input
+      type="date"
+      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+      onChange={(e) => setUpdate((u) => ({ ...u, pickup: e.target.value }))}
+    />
+  </div>
+</div>
+
 
               <div className="flex gap-3 pt-2">
                 <button
