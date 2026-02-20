@@ -11,7 +11,7 @@ function StatCard({ label, value, tone = "teal" }) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md border border-slate-200 p-5 hover:shadow-lg transition-transform transform hover:-translate-y-1">
+    <div className="bg-white rounded-xl shadow-md border border-slate-200 p-5 hover:shadow-lg transition-transform ">
       
       {/* Label */}
       <p className="text-sm text-slate-500 font-medium">{label}</p>

@@ -52,11 +52,12 @@ function Adhome() {
 
      
       {active === "Requests" && (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 max-w-[600px] mx-auto">
-        <StatCard label="Total" value={users.length} />
-        <ActivityHeatmap users={users} days={30} />
-      </div>
-        )}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 max-w-[800px] mx-auto">
+    <StatCard label="Total" value={users.length} />
+    <ActivityHeatmap users={users} />
+  </div>
+)}
+
 
         {active === "Make announcement" && (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 max-w-[600px] mx-auto">
@@ -66,12 +67,32 @@ function Adhome() {
         )}
 
         {active === "Manage Users" && (
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 max-w-[800px] mx-auto">
-        <StatCard label="Total Users" value={registered.length} tone="slate" />
-<StatCard label="Male" value={registered.filter(r => r.gender === 'Male').length} tone="teal" />
-<StatCard label="Female" value={registered.filter(r => r.gender === 'Female').length} tone="pink" />
-      </div>
-        )}
+  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6 max-w-[900px] mx-auto">
+    <StatCard
+      label="Total Accepted"
+      value={registered.filter(r => r.status === 'Accepted').length}
+      tone="slate"
+    />
+    <StatCard
+      label="Male"
+      value={registered.filter(r => r.gender === 'Male' && r.status === 'Accepted').length}
+      tone="teal"
+    />
+    <StatCard
+      label="Female"
+      value={registered.filter(r => r.gender === 'Female' && r.status === 'Accepted').length}
+      tone="pink"
+    />
+    <StatCard
+      label="Pending"
+      value={registered.filter(r => r.status === 'Pending').length}
+      tone="yellow"
+    />
+  </div>
+)}
+
+
+
         {active === "Records" && (
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6 max-w-[1000px] mx-auto">
         <StatCard label="Total" value={users.length} />

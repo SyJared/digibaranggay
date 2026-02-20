@@ -11,31 +11,51 @@ function Requestees() {
   const [actionError, setActionError] = useState("");
   const [actionFeedback, setActionFeedback] = useState("");
 
+   
   const handleClick = async (id, transaction, status) => {
-    setActionError("");
-    setActionFeedback("");
-    try {
-      const res = await fetch("http://localhost/digibaranggay/handlestatus.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, transaction, status, pickup: update.pickup, pay: update.pay }),
-      });
-      const data = await res.json();
-      if (data.Success === true) {
-        setActionFeedback(data.message);
-        setUsers((prevUsers) =>
-          prevUsers.map((u) =>
-            u.id === id && u.transaction === transaction ? { ...u, status } : u
-          )
-        )
-        
-      } else {
-        setActionError(data.message);
-      }
-    } catch (error) {
-      setActionError("Failed to fetch");
-    }
+  setActionError("");
+  setActionFeedback("");
+
+  const payload = {
+    id,
+    transaction,
+    status,
+    pickup: update.pickup,
+    pay: update.pay
   };
+
+  try {
+    const res = await fetch("http://localhost/digibaranggay/handlestatus.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      alert("Server error: " + res.status);
+      return;
+    }
+
+    const data = await res.json();
+
+    // ✅ Show feedback immediately
+    if (data.Success) {
+      setActionFeedback(data.message);
+      setUsers(prev =>
+        prev.map(u =>
+          u.id === id && u.transaction === transaction ? { ...u, status } : u
+        )
+      );
+    } else {
+      setActionError(data.message);
+    }
+  } catch (error) {
+    setActionError("Failed to fetch: " + error.message);
+  }
+};
+
+
+
 
   const toggleActive = (id, transaction) => {
     setActionError("");

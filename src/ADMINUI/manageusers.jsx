@@ -29,26 +29,29 @@ function ManageUsers() {
   };
 
   const handleStatusChange = async (id, newStatus) => {
-    try {
-      setUserStatuses((prev) => ({ ...prev, [id]: newStatus }));
-      setShowModal(false);
+  try {
+    setUserStatuses((prev) => ({ ...prev, [id]: newStatus }));
+    setShowModal(false);
 
-      const res = await fetch("http://localhost/digibaranggay/updateStatus.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: newStatus }),
-      });
+    const res = await fetch("http://localhost/digibaranggay/updateStatus.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status: newStatus }),
+    });
 
-      const data = await res.json();
-      if (!data.success) {
-        alert("Failed to update status: " + data.message);
-        setUserStatuses((prev) => ({ ...prev, [id]: registered.find(u => u.id === id).status }));
-      }
-    } catch (err) {
-      alert("Error updating status");
-      console.error(err);
+    const data = await res.json();
+    alert(JSON.stringify(data)); // ⚡ For testing, shows email + PIN info
+
+    if (!data.success) {
+      setUserStatuses((prev) => ({ ...prev, [id]: registered.find(u => u.id === id).status }));
+      alert("Failed: " + data.message);
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Error updating status");
+  }
+};
+
 
   // Filtered + searched users
   const filteredUsers = registered
