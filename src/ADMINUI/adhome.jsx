@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import Manageusers from "./manageusers";
 import Requestees from "./requestees";
 import Records from "./records";
@@ -10,13 +10,47 @@ import StatCard from "./overview";
 import { AnnouncementContext } from "../announcementList";
 import { RegisteredContext } from "../registeredContext";
 import ActivityHeatmap from "./activityHeatMap";
+import { RoleContext } from "../rolecontext";
+import { useNavigate } from "react-router-dom";
 
 function Adhome() {
-  const {users} = useContext(RequestContext);
-  const {announcement} = useContext(AnnouncementContext);
-  const {registered, error} = useContext(RegisteredContext)
+  const { users } = useContext(RequestContext);
+  const { announcement } = useContext(AnnouncementContext);
+  const { registered } = useContext(RegisteredContext);
+
+  const { user, setUser, role, setRole } = useContext(RoleContext);
+  const navigate = useNavigate();
 
   const [active, setActive] = useState("Requests");
+
+  // ✅ Fetch session info on mount so admin header renders
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const res = await fetch("http://localhost/digibaranggay/checkAuth.php", {
+          method: "GET",
+          credentials: "include", // important for PHP session
+        });
+        const data = await res.json();
+        if (data.authenticated) {
+          setUser(data.user);
+          setRole(data.user.role);
+          if (data.user.role !== "admin") {
+            // prevent non-admin from staying here
+            navigate("/USERUI/user");
+          }
+        } else {
+          // not authenticated → redirect to login
+          navigate("/LOGIN/login");
+        }
+      } catch (err) {
+        console.error("Failed to fetch session", err);
+        navigate("/LOGIN/login");
+      }
+    };
+
+    if (!user) fetchSession(); // only fetch if context is empty
+  }, [user, setUser, setRole, navigate]);
 
   const handleMainClick = (item) => {
     setActive(item);
@@ -24,8 +58,7 @@ function Adhome() {
 
   return (
     <div className="min-h-screen bg-white p-6 mt-16">
-
- 
+      {/* NAVIGATION BUTTONS */}
       <div className="flex gap-4 mb-6">
         {[
           { name: "Requests", icon: Newspaper },
@@ -48,74 +81,62 @@ function Adhome() {
         ))}
       </div>
 
-
-
-     
+      {/* OVERVIEW CARDS */}
       {active === "Requests" && (
-  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 max-w-[800px] mx-auto">
-    <StatCard label="Total" value={users.length} />
-    <ActivityHeatmap users={users} />
-  </div>
-)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 max-w-[800px] mx-auto">
+          <StatCard label="Total" value={users.length} />
+          <ActivityHeatmap users={users} />
+        </div>
+      )}
 
+      {active === "Make announcement" && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 max-w-[600px] mx-auto">
+          <StatCard label="Total" value={announcement.length} />
+          <StatCard label="Urgent" value={2} />
+        </div>
+      )}
 
-        {active === "Make announcement" && (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 max-w-[600px] mx-auto">
-        <StatCard label="Total" value={announcement.length} />
-        <StatCard label="Urgent" value={2} />
-      </div>
-        )}
+      {active === "Manage Users" && (
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6 max-w-[900px] mx-auto">
+          <StatCard
+            label="Total Accepted"
+            value={registered.filter(r => r.status === 'Accepted').length}
+            tone="slate"
+          />
+          <StatCard
+            label="Male"
+            value={registered.filter(r => r.gender === 'Male' && r.status === 'Accepted').length}
+            tone="teal"
+          />
+          <StatCard
+            label="Female"
+            value={registered.filter(r => r.gender === 'Female' && r.status === 'Accepted').length}
+            tone="pink"
+          />
+          <StatCard
+            label="Pending"
+            value={registered.filter(r => r.status === 'Pending').length}
+            tone="yellow"
+          />
+        </div>
+      )}
 
-        {active === "Manage Users" && (
-  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6 max-w-[900px] mx-auto">
-    <StatCard
-      label="Total Accepted"
-      value={registered.filter(r => r.status === 'Accepted').length}
-      tone="slate"
-    />
-    <StatCard
-      label="Male"
-      value={registered.filter(r => r.gender === 'Male' && r.status === 'Accepted').length}
-      tone="teal"
-    />
-    <StatCard
-      label="Female"
-      value={registered.filter(r => r.gender === 'Female' && r.status === 'Accepted').length}
-      tone="pink"
-    />
-    <StatCard
-      label="Pending"
-      value={registered.filter(r => r.status === 'Pending').length}
-      tone="yellow"
-    />
-  </div>
-)}
+      {active === "Records" && (
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6 max-w-[1000px] mx-auto">
+          <StatCard label="Total" value={users.length} />
+          <StatCard label="Pending" value={users.filter(u => u.status === 'Pending').length} tone="amber" />
+          <StatCard label="Approved" value={users.filter(u => u.status === 'Approved').length} tone="emerald" />
+          <StatCard label="Rejected" value={users.filter(u => u.status === 'Rejected').length} tone="red" />
+          <StatCard label="Expired" value={users.filter(u => u.status === 'Expired').length} tone="purple" />
+        </div>
+      )}
 
-
-
-        {active === "Records" && (
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6 max-w-[1000px] mx-auto">
-        <StatCard label="Total" value={users.length} />
-       <StatCard label="Pending" value={users.filter(u => u.status === 'Pending').length} tone="amber" />
-<StatCard label="Approved" value={users.filter(u => u.status === 'Approved').length} tone="emerald" />
-<StatCard label="Rejected" value={users.filter(u => u.status === 'Rejected').length} tone="red" />
-<StatCard label="Expired" value={users.filter(u => u.status === 'Expired').length} tone="purple" />
-        
-      </div>
-
-        )}
-
-     
-      <div className="bg-gray-50 border-e-3 border-l-3 shadow-md border-teal-800 rounded-xl  overflow-scroll no-scrollbar mx-20 max-h-[600px]">
+      {/* CONTENT */}
+      <div className="bg-gray-50 border-e-3 border-l-3 shadow-md border-teal-800 rounded-xl overflow-scroll no-scrollbar mx-20 max-h-[600px]">
         {active === "Manage Users" && <Manageusers />}
         {active === "Requests" && <Requestees />}
         {active === "Records" && <Records />}
         {active === "Make announcement" && <Announcement />}
-        {!active && (
-          <div className="text-center text-gray-500 text-lg">
-            Select a section from the nav above to see overview and content.
-          </div>
-        )}
       </div>
     </div>
   );

@@ -1,22 +1,38 @@
-import { createContext, useState } from "react";
-
+import { createContext, useState, useEffect } from "react";
 
 export const RoleContext = createContext({
-  role: '',
+  user: undefined, // undefined = still loading
+  role: "",
+  setUser: () => {},
   setRole: () => {},
-  user: null
 });
 
-
 export function RoleProvider({ children }) {
+  const [user, setUser] = useState(undefined);
+  const [role, setRole] = useState("");
 
-  const stored = localStorage.getItem('user');
-  const parsed = stored ? JSON.parse(stored) : null;
+  useEffect(() => {
+    fetch("http://localhost/digibaranggay/checkAuth.php", {
+      credentials: "include", // important for PHP session cookies
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setUser(data.user);
+          setRole(data.user.role);
+        } else {
+          setUser(null);
+          setRole("");
+        }
+      })
+      .catch(() => {
+        setUser(null);
+        setRole("");
+      });
+  }, []);
 
-  const [role, setRole] = useState(parsed?.role || '');
-  
   return (
-    <RoleContext.Provider value={{ role, setRole, user: parsed }}>
+    <RoleContext.Provider value={{ user, role, setUser, setRole }}>
       {children}
     </RoleContext.Provider>
   );

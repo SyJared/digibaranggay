@@ -4,27 +4,30 @@ import { RequestContext } from "../requestList";
 function Records() {
   const { users, listingMessage, setListingMessage } = useContext(RequestContext);
   const [active, setActive] = useState({ id: null, transaction: null });
-  const [filterStatus, setFilterStatus] = useState("Approved");
+  const [filterStatus, setFilterStatus] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const statuses = ["Approved", "Pending", "Rejected", "Expired"];
+  const statuses = ["All", "Approved", "Pending", "Rejected", "Expired", "Successful"];
 
   const statusBorder = {
     Approved: "border-emerald-600",
     Pending: "border-orange-400",
     Rejected: "border-rose-600",
     Expired: "border-gray-500",
+    Successful: "border-emerald-600",
   };
+
   const statusText = {
     Approved: "text-emerald-700 bg-emerald-100",
     Pending: "text-orange-700 bg-orange-100",
     Rejected: "text-rose-700 bg-rose-100",
     Expired: "text-gray-700 bg-gray-200",
+    Successful: "text-emerald-700 bg-emerald-100",
   };
 
   const toggleActive = (id, transaction) => {
     if (active?.id === id && active?.transaction === transaction) {
-      setActive(null);
+      setActive({ id: null, transaction: null });
     } else {
       setActive({ id, transaction });
     }
@@ -38,25 +41,65 @@ function Records() {
     });
   };
 
-  // Filter + search
-  const filteredUsers = users
-    .filter((u) => u.status === filterStatus)
-    .filter((u) => {
-      const name = u.name.toLowerCase();
-      const email = u.email?.toLowerCase() || "";
-      return (
-        name.includes(searchQuery.toLowerCase()) ||
-        email.includes(searchQuery.toLowerCase())
-      );
-    });
+  // ✅ Handler placeholder (connect this to backend later)
+  const handleMarkSuccessful = async (id, transaction) => {
+  if (!window.confirm("Mark this request as successful?")) return;
+
+  try {
+    const res = await fetch(
+      "http://localhost/digibaranggay/mark_successful.php",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          id,
+          transaction
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert(data.message);
+
+      // Update UI context state instead of reload (better practice)
+      window.location.reload(); // temporary but acceptable
+    } else {
+      alert(data.message);
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
+};
+
+  const normalizedUsers = users.map((u) => ({
+    ...u,
+    status: (u.status || "").trim(),
+    name: (u.name || "").trim(),
+    email: (u.email || "").trim(),
+  }));
+
+  const filteredUsers = normalizedUsers.filter((u) => {
+    const statusMatch =
+      filterStatus === "All" || u.status.toLowerCase() === filterStatus.toLowerCase();
+
+    const searchMatch =
+      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return statusMatch && searchMatch;
+  });
 
   return (
     <div className="records-div flex flex-col gap-3">
+      {listingMessage && <p className="text-center text-red-600">{listingMessage}</p>}
 
-      {/* Listing Message */}
-      {listingMessage && <p>{listingMessage}</p>}
-
-      {/* Sticky Filters + Search */}
       <div className="sticky top-0 z-20 bg-slate-50 p-4 flex flex-col md:flex-row gap-4 border-b border-slate-200">
         <div className="flex gap-3 flex-wrap">
           {statuses.map((status) => (
@@ -74,7 +117,6 @@ function Records() {
           ))}
         </div>
 
-        {/* Search Bar */}
         <input
           type="text"
           placeholder="Search by name or email..."
@@ -84,65 +126,80 @@ function Records() {
         />
       </div>
 
-      {/* User Records */}
-      {filteredUsers.map((u) => {
-        const isActive = active?.id === u.id && active?.transaction === u.transaction;
-        return (
-          <div
-            key={u.id}
-            className={`record-info ${statusBorder[u.status]} overflow-hidden transition-all duration-300 cursor-pointer`}
-            onClick={() => toggleActive(u.id, u.transaction)}
-          >
-            <div className="grid grid-cols-2 w-full p-3">
-              <div>
-                <h2 className="text-lg font-semibold text-emerald-900">{u.transaction}</h2>
-                <span className="text-slate-500 text-sm">{u.name}</span>
-              </div>
+      {filteredUsers.length > 0 ? (
+        filteredUsers.map((u) => {
+          const isActive = active?.id === u.id && active?.transaction === u.transaction;
 
-              <div className="justify-self-end content-center">
-                <span className={`px-3 py-1 rounded-2xl text-sm font-semibold ${statusText[u.status]}`}>
-                  {u.status}
-                </span>
-              </div>
-            </div>
-
+          return (
             <div
-              className={`transition-all duration-300 overflow-hidden ${
-                isActive ? "max-h-60 opacity-100 mt-3" : "max-h-0 opacity-0"
-              }`}
+              key={`${u.id}-${u.transaction}`}
+              className={`record-info ${statusBorder[u.status]} overflow-hidden transition-all duration-300 cursor-pointer`}
+              onClick={() => toggleActive(u.id, u.transaction)}
             >
-              <div className="grid grid-cols-2 gap-3 text-sm text-slate-600 p-3">
+              <div className="grid grid-cols-2 w-full p-3">
                 <div>
-                  <span className="font-semibold text-slate-700">Date Requested</span>
-                  <p>{formatDate(u.date)}</p>
+                  <h2 className="text-lg font-semibold text-emerald-900">{u.transaction}</h2>
+                  <span className="text-slate-500 text-sm">{u.name}</span>
                 </div>
 
-                <div>
-                  <span className="font-semibold text-slate-700">Date Updated</span>
-                  <p>{formatDate(u.dateupdated)}</p>
+                <div className="justify-self-end content-center">
+                  <span className={`px-3 py-1 rounded-2xl text-sm font-semibold ${statusText[u.status]}`}>
+                    {u.status}
+                  </span>
                 </div>
+              </div>
 
-                <div>
-                  <span className="font-semibold text-slate-700">Payment</span>
-                  <p>₱{u.pay}</p>
-                </div>
+              <div
+                className={`transition-all duration-300 overflow-hidden ${
+                  isActive ? "max-h-96 opacity-100 mt-3" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="grid grid-cols-2 gap-3 text-sm text-slate-600 p-3">
+                  <div>
+                    <span className="font-semibold text-slate-700">Date Requested</span>
+                    <p>{formatDate(u.date)}</p>
+                  </div>
 
-                <div>
-                  <span className="font-semibold text-slate-700">Pickup</span>
-                  <p>{u.pickup}</p>
-                </div>
+                  <div>
+                    <span className="font-semibold text-slate-700">Date Updated</span>
+                    <p>{formatDate(u.dateupdated)}</p>
+                  </div>
 
-                <div className="col-span-2">
-                  <span className="font-semibold text-slate-700">Purpose</span>
-                  <p className="text-slate-600">{u.purpose}</p>
+                  <div>
+                    <span className="font-semibold text-slate-700">Payment</span>
+                    <p>₱{u.pay}</p>
+                  </div>
+
+                  <div>
+                    <span className="font-semibold text-slate-700">Pickup</span>
+                    <p>{u.pickup}</p>
+                  </div>
+
+                  <div className="col-span-2">
+                    <span className="font-semibold text-slate-700">Purpose</span>
+                    <p className="text-slate-600">{u.purpose}</p>
+                  </div>
+
+                  {/* ✅ Mark Successful Button */}
+                  {u.status === "Approved" && (
+                    <div className="col-span-2 flex justify-end pt-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMarkSuccessful(u.id, u.transaction);
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+                      >
+                        Mark as Successful
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
-        );
-      })}
-
-      {filteredUsers.length === 0 && (
+          );
+        })
+      ) : (
         <p className="text-center text-gray-500 mt-6">No records found.</p>
       )}
     </div>

@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import {
   CreditCard,
   Home,
@@ -6,19 +6,19 @@ import {
   FileText,
   UserRoundCheck,
   Briefcase,
-  Check,
-  X,
-  SquareArrowRight,
   IdCard,
   FileCheck
 } from "lucide-react";
 import RequestBubble from "./requestbubble";
 import PersonalInfoModal from "./personalInfoModal";
-import { RequestContext } from "../requestList";
 import Verify from "./verify"; // PIN modal
+import { RequestContext } from "../requestList";
+import { RoleContext } from "../rolecontext";
 
 function Requests() {
   const { users } = useContext(RequestContext);
+  const { user } = useContext(RoleContext); // ✅ use context instead of localStorage
+
   const [transaction, setTransaction] = useState("KKID Card");
   const [purpose, setPurpose] = useState("");
   const [active, setActive] = useState("KKID Card");
@@ -26,11 +26,55 @@ function Requests() {
   const [isChecked, setIsChecked] = useState(false);
   const [showVerify, setShowVerify] = useState(false); // PIN modal
   const [pendingRequest, setPendingRequest] = useState(null); // store transaction & purpose before submitting
-
-  // Only one message now for request/PIN
   const [requestMessage, setRequestMessage] = useState("");
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [notifyMessage, setNotifyMessage] = useState("");
+
+  // Refetch the user session if missing (for page reloads)
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (!user) {
+        try {
+          const res = await fetch("http://localhost/digibaranggay/checkAuth.php", {
+            method: "GET",
+            credentials: "include", // send session cookie
+          });
+          const data = await res.json();
+          if (!data.authenticated) {
+            window.location.href = "/login"; // redirect to login
+          }
+        } catch (err) {
+          console.error("Failed to check session:", err);
+          window.location.href = "/login";
+        }
+      }
+    };
+    checkAuth();
+  }, [user]);
+
+  const handleNotifyAdmin = async () => {
+  if (!existingRequest) return;
+
+  try {
+    const res = await fetch(
+      "http://localhost/digibaranggay/notify_request_again.php",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          transaction: existingRequest.transaction
+        })
+      }
+    );
+   
+    const data = await res.json();
+
+    setNotifyMessage(data.message);
+  } catch {
+    setNotifyMessage("Failed to notify admin");
+  }
+};
 
   const payment = {
     "KKID Card": 0.0,
@@ -60,20 +104,21 @@ function Requests() {
     "Working clearance": FileCheck
   };
 
-  const cards = [
-    { card: "KKID Card" },
-    { card: "Brgy. clearance" },
-    { card: "Certificate of indigency" },
-    { card: "Working clearance" },
-    { card: "OSCA" },
-    { card: "First job seeker" },
-    { card: "Barangay inhabitants" },
-    { card: "Barangay ID" }
-  ];
+  const cards = Object.keys(iconMap).map((c) => ({ card: c }));
 
-  const existingRequest = users?.find(
-    (req) => String(req.id) === String(user.id) && req.transaction === transaction
-  );
+  const existingRequest = users
+  ?.filter(
+    (req) =>
+      String(req.id) === String(user?.id) &&
+      req.transaction === transaction
+  )
+  ?.sort(
+    (a, b) =>
+      new Date(b.dateupdated || b.date) -
+      new Date(a.dateupdated || a.date)
+  )[0];
+  const canRequestAgain =
+  !existingRequest || existingRequest.request_again === '1';
 
   const cardClick = (card) => {
     setTransaction(card);
@@ -86,13 +131,11 @@ function Requests() {
       setRequestMessage("Please select a transaction");
       return;
     }
-
     if (!purpose.trim()) {
       setRequestMessage("Please enter a purpose");
       return;
     }
 
-    // Open PIN modal
     setPendingRequest({ transaction, purpose });
     setShowVerify(true);
   };
@@ -106,9 +149,9 @@ function Requests() {
         transaction: pendingRequest.transaction,
         purpose: pendingRequest.purpose,
         user,
-        pin,
-        payment: payment[pendingRequest.transaction]
-      })
+        pin: String(pin).padStart(4, "0"), // ✅ always 4 chars
+        payment: payment[pendingRequest.transaction],
+      }),
     });
 
     const data = await res.json();
@@ -120,15 +163,17 @@ function Requests() {
       return { success: false };
     }
   } catch (error) {
+    console.error(error);
     return { success: false };
   }
 };
+console.log("User in request.jsx:", user); // Debugging line
 
   const handleVerify = () => {
-    if (isChecked) {
-      setIsVerified(true);
-    }
+    if (isChecked) setIsVerified(true);
   };
+
+  if (!user) return <div className="text-center mt-20">Loading...</div>; // prevent errors
 
   return (
     <>
@@ -160,18 +205,47 @@ function Requests() {
         <div className="relative flex-1 bg-white border border-gray-200 rounded-xl shadow-lg p-6 space-y-4 max-h-[420px]">
           <h1 className="text-2xl font-bold text-gray-900">{transaction}</h1>
 
-          {existingRequest && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl backdrop-blur-sm bg-white/50">
-              <div className="bg-white px-6 py-4 rounded-lg shadow-xl text-center max-w-sm">
-                <p className="text-lg font-bold text-gray-800 whitespace-nowrap">
-                  Your request for {transaction} is
-                </p>
-                <p className={`text-xl font-extrabold ${color[existingRequest.status]} mt-1`}>
-                  {existingRequest.status}
-                </p>
-              </div>
-            </div>
-          )}
+          {existingRequest?.request_again === "0" && (
+  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-xl backdrop-blur-sm bg-white/50 gap-4">
+
+    <div className="bg-white px-6 py-4 rounded-lg shadow-xl text-center max-w-sm space-y-3">
+
+      <p className="text-lg font-bold text-gray-800">
+        Your request for {transaction} is
+      </p>
+
+      <p className={`text-xl font-extrabold ${color[existingRequest.status]}`}>
+        {existingRequest.status}
+      </p>
+
+    </div>
+
+    {/* ✅ Request Again Allowed */}
+    {existingRequest.request_again === '1' && (
+      <p className="text-green-700 font-semibold">
+        You may request this document again.
+      </p>
+    )}
+
+    {/* Notify Admin Button */}
+    {existingRequest.status === "Successful" &&
+      existingRequest.request_again === '0' && (
+        <button
+          onClick={handleNotifyAdmin}
+          className="bg-teal-700 hover:bg-teal-600 text-white px-6 py-2 rounded-lg shadow transition"
+        >
+          Notify Admin to Allow Request Again
+        </button>
+    )}
+
+    {notifyMessage && (
+      <p className="text-sm text-green-700 font-medium">
+        {notifyMessage}
+      </p>
+    )}
+
+  </div>
+)}
 
           <div className="flex flex-col space-y-6 gap-2">
             <label htmlFor="purpose" className="font-semibold text-gray-700">
@@ -190,7 +264,7 @@ function Requests() {
 
           <div className="flex flex-col gap-3">
             <button
-              disabled={!isVerified && !isChecked}
+              disabled={(!isVerified && !isChecked) || !canRequestAgain}
               onClick={handleClick}
               className={`w-full py-2 rounded-lg font-semibold transition-all ${
                 isVerified
@@ -274,7 +348,7 @@ function Requests() {
 
             <button
               onClick={handleVerify}
-              disabled={!isChecked && !isVerified}
+              disabled={(!isVerified && !isChecked) || !canRequestAgain}
               className={`w-full py-3 font-semibold rounded-lg transition-all ${
                 isVerified
                   ? "bg-green-500 text-white cursor-default"

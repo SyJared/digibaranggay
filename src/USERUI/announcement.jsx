@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { AnnouncementContext } from "../announcementList";
 import rightArrow from '../assets/right-arrow.png';
 import leftArrow from '../assets/left-arrow.png';
+import './user.css';
 
 function Announcement(){
 const {announcement, message, setMessage} = useContext(AnnouncementContext);
