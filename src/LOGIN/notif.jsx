@@ -14,39 +14,52 @@ export default function NotificationBell() {
   /* ================= FETCH NOTIFICATIONS ================= */
 
   async function fetchNotifications() {
-    try {
-      const res = await fetch(
-        "http://localhost/digibaranggay/get_notifications.php",
-        { credentials: "include" }
-      );
+  try {
+    const res = await fetch(
+      "http://localhost/digibaranggay/get_notifications.php",
+      { credentials: "include" }
+    );
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (data.success) {
-        setNotifications(data.data || []);
-      }
-    } catch (err) {
-      console.error(err);
+    if (data.success) {
+      console.log("Fetched notifications:", data);
+      setNotifications(data.data || []);
     }
+  } catch (err) {
+    console.error("Notification fetch error:", err);
   }
+}
 
   useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 8000);
-    return () => clearInterval(interval);
-  }, []);
+  let mounted = true;
+
+  async function load() {
+    if (!mounted) return;
+    await fetchNotifications();
+  }
+
+  load();
+
+  const interval = setInterval(load, 8000);
+
+  return () => {
+    mounted = false;
+    clearInterval(interval);
+  };
+}, []);
 
   /* ================= FILTERS (unread only) ================= */
 
   const newUnread = useMemo(() => {
-    return notifications.filter(n => n.type === "new" && n.is_read === 0);
+    return notifications.filter(n => n.type === "new");
   }, [notifications]);
 
   const requestAgainUnread = useMemo(() => {
-    return notifications.filter(n => n.type === "request_again" && n.is_read === 0);
+    return notifications.filter(n => n.type === "request_again");
   }, [notifications]);
 
-  const totalBadge = newUnread.length + requestAgainUnread.length;
+  const totalBadge = notifications.filter(n => n.is_read === 0).length;
 
   const currentList = activeTab === "new" ? newUnread : requestAgainUnread;
 
@@ -183,33 +196,40 @@ export default function NotificationBell() {
             )}
 
             {currentList.map((n) => (
-              <div
-                key={n.id}
-                className="p-4 bg-teal-50 hover:bg-teal-100 transition cursor-pointer"
-              >
-                <div className="flex justify-between gap-3">
-                  <div className="flex-1 space-y-1">
+  <div
+    key={n.id}
+    className={`p-4 transition cursor-pointer ${
+      n.is_read === 0
+        ? "bg-teal-50 hover:bg-teal-100"
+        : "bg-white hover:bg-gray-50"
+    }`}
+  >
+    <div className="flex justify-between gap-3">
+      <div className="flex-1 space-y-1">
 
-                    <div className="font-semibold text-gray-900 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-teal-500 shrink-0" />
-                      <span>
-                        {n.firstname} {n.lastname}
-                      </span>
-                    </div>
+        <div className="font-semibold text-gray-900 flex items-center gap-2">
+          {n.is_read === 0 && (
+            <span className="w-2 h-2 rounded-full bg-teal-500 shrink-0" />
+          )}
 
-                    <p className="text-sm text-gray-800">{n.message}</p>
+          <span>
+            {n.firstname} {n.lastname}
+          </span>
+        </div>
 
-                    <p className="text-xs text-gray-500">
-                      Transaction: {n.transaction}
-                    </p>
-                  </div>
+        <p className="text-sm text-gray-800">{n.message}</p>
 
-                  <span className="text-xs text-gray-400 whitespace-nowrap">
-                    {getRelativeTime(n.created_at)}
-                  </span>
-                </div>
-              </div>
-            ))}
+        <p className="text-xs text-gray-500">
+          Transaction: {n.transaction}
+        </p>
+      </div>
+
+      <span className="text-xs text-gray-400 whitespace-nowrap">
+        {getRelativeTime(n.created_at)}
+      </span>
+    </div>
+  </div>
+))}
 
           </div>
         </div>

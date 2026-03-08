@@ -45,6 +45,7 @@ export default function UserNotificationBell() {
 
       if (data.success) {
         setNotifications(data.data || []);
+        console.log("Fetched user notifications:", data);
       }
     } catch (err) {
       console.error(err);
@@ -66,8 +67,9 @@ export default function UserNotificationBell() {
   /* ================= MARK AS READ ================= */
 
   async function markAllAsRead() {
-    if (unread.length === 0) return;
+  if (unread.length === 0) return;
 
+  try {
     await Promise.all(
       unread.map(n =>
         fetch("http://localhost/digibaranggay/mark_user_notification_read.php", {
@@ -79,10 +81,17 @@ export default function UserNotificationBell() {
       )
     );
 
-    setNotifications(prev =>
-      prev.map(n => ({ ...n, user_read: 1 }))
-    );
+   setNotifications(prev =>
+  prev.map(n =>
+    unread.some(u => u.id === n.id)
+      ? { ...n, user_read: 1 }
+      : n
+  )
+);
+  } catch (err) {
+    console.error("Mark read error:", err);
   }
+}
 
   /* ================= BELL CLICK ================= */
 
@@ -90,7 +99,7 @@ export default function UserNotificationBell() {
     const isOpening = !open;
     setOpen(isOpening);
 
-    if (isOpening) {
+    if (!isOpening) {
       markAllAsRead();
     }
   }

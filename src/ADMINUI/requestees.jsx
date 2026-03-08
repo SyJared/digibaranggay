@@ -126,7 +126,7 @@ const pushUserNotification = async (userId, transaction, status) => {
 
   return false;
 });
-console.log("Filtered Users:", users);
+
   const selectedUser = users.find(
     (u) =>
       u.id === active?.id && u.transaction === active?.transaction
