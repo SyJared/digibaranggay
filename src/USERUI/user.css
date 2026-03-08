@@ -6,7 +6,9 @@
 .animate-slide-right {
           animation: slideRight 2s ease-in-out infinite;
 }
-      
+      body{
+        padding-bottom: 30px;
+      }
 .next-prev-buttons{
   @apply w-7 hover:cursor-pointer border-1 px-1 py-2 border-emerald-600 hover:bg-emerald-600 transition-all duration-200 rounded-lg
   active:scale-90;

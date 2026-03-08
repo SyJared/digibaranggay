@@ -9,7 +9,7 @@ import {
   IdCard,
   FileCheck
 } from "lucide-react";
-import RequestBubble from "./requestbubble";
+
 import PersonalInfoModal from "./personalInfoModal";
 import Verify from "./verify"; // PIN modal
 import { RequestContext } from "../requestList";
@@ -30,6 +30,11 @@ function Requests() {
 
   const [notifyMessage, setNotifyMessage] = useState("");
 
+  useEffect(() => {
+  setRequestMessage("");
+  setNotifyMessage("");
+  setPurpose("");
+}, [transaction]);
   // Refetch the user session if missing (for page reloads)
   useEffect(() => {
     const checkAuth = async () => {
@@ -228,15 +233,15 @@ console.log("User in request.jsx:", user); // Debugging line
     )}
 
     {/* Notify Admin Button */}
-    {existingRequest.status === "Successful" &&
-      existingRequest.request_again === '0' && (
-        <button
-          onClick={handleNotifyAdmin}
-          className="bg-teal-700 hover:bg-teal-600 text-white px-6 py-2 rounded-lg shadow transition"
-        >
-          Notify Admin to Allow Request Again
-        </button>
-    )}
+    {["Successful", "Rejected", "Expired"].includes(existingRequest.status) &&
+  existingRequest.request_again === '0' && (
+    <button
+      onClick={handleNotifyAdmin}
+      className="bg-teal-700 hover:bg-teal-600 text-white px-6 py-2 rounded-lg shadow transition"
+    >
+      Notify Admin to Allow Request Again
+    </button>
+)}
 
     {notifyMessage && (
       <p className="text-sm text-green-700 font-medium">
@@ -264,7 +269,7 @@ console.log("User in request.jsx:", user); // Debugging line
 
           <div className="flex flex-col gap-3">
             <button
-              disabled={(!isVerified && !isChecked) || !canRequestAgain}
+              disabled={!isVerified || !isChecked || !canRequestAgain}
               onClick={handleClick}
               className={`w-full py-2 rounded-lg font-semibold transition-all ${
                 isVerified
@@ -307,7 +312,7 @@ console.log("User in request.jsx:", user); // Debugging line
               </div>
               <div>
                 <p className="font-semibold text-gray-700">Contact</p>
-                <span className="text-gray-800">{user.contact}</span>
+                <span className="text-gray-800">{user.contactnumber}</span>
               </div>
               <div>
                 <p className="font-semibold text-gray-700">Civil Status</p>
@@ -319,11 +324,10 @@ console.log("User in request.jsx:", user); // Debugging line
               </div>
               <div>
                 <p className="font-semibold text-gray-700">Household no.</p>
-                <span className="text-gray-800">{user.housenumber}</span>
+                <span className="text-gray-800">{user.household}</span>
               </div>
             </div>
           </div>
-
           {/* Verify info card */}
           <div
             className={`rounded-xl shadow-lg p-6 transition-all duration-500 ${
@@ -363,7 +367,7 @@ console.log("User in request.jsx:", user); // Debugging line
         </div>
       </div>
 
-      <RequestBubble />
+
 
       {/* PIN modal */}
       <Verify

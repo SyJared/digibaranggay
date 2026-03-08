@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Bell } from "lucide-react";
 
 export default function NotificationBell() {
@@ -6,6 +6,10 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("new");
+
+  const dropdownRef = useRef(null);
+
+  
 
   /* ================= FETCH NOTIFICATIONS ================= */
 
@@ -107,8 +111,23 @@ export default function NotificationBell() {
     return "just now";
   }
 
+  useEffect(() => {
+    function handleOutsideClick(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    if (open) {
+  document.addEventListener("mousedown", handleOutsideClick);
+} else {
+  document.removeEventListener("mousedown", handleOutsideClick);
+}
+
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [open]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
 
       <button
         onClick={handleClick}
@@ -124,7 +143,7 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-3 w-96 bg-white shadow-xl rounded-xl border z-50">
+        <div className="absolute right-0 mt-3 w-96 bg-white shadow-xl rounded-xl border z-50" >
 
           <div className="p-5 border-b">
             <h2 className="font-bold text-lg">Notifications</h2>

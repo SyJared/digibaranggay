@@ -19,7 +19,7 @@ function App() {
       <RequestProvider><Header /> </RequestProvider>
       <Routes>
         <Route path="/" element={<Navigate to="/LOGIN/login" replace />} />
-        <Route path="/LOGIN/login" element={<Login />} />
+        <Route path="/LOGIN/login" element={<RequestProvider><Login /></RequestProvider>} />
         <Route path="/REGISTER/register" element={<Register />} />
           <Route path="/ADMINUI/adhome" element={<RequestProvider><AnnouncementList><Adhome /></AnnouncementList></RequestProvider>}></Route>
         <Route path="/USERUI/user" element={<RequestProvider><AnnouncementList><User /></AnnouncementList></RequestProvider>}></Route>

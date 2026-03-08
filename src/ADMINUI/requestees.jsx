@@ -8,14 +8,32 @@ function Requestees() {
   const [active, setActive] = useState(null);
   const [filter, setFilter] = useState("");
   const [statusView, setStatusView] = useState("Pending"); // ✅ NEW
-  const [update, setUpdate] = useState({ pay: "", pickup: "" });
+  const [update, setUpdate] = useState({ pay: "", pickup: "", response: ""});
 
   const [actionError, setActionError] = useState("");
   const [actionFeedback, setActionFeedback] = useState("");
 
- 
+  /* ================= PUSH USER NOTIFICATION ================= */
 
-  
+const pushUserNotification = async (userId, transaction, status) => {
+  if (status !== "Approved" && status !== "Rejected") return;
+
+  const message =
+    status === "Approved"
+      ? `Your request for ${transaction} has been Approved.`
+      : `Your request for ${transaction} has been Rejected. Please contact the barangay for more details.`;
+
+  await fetch("http://localhost/digibaranggay/push_user_notification.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_id: userId,
+      transaction,
+      message,
+      type: "user"
+    })
+  });
+};
 
   const handleClick = async (id, transaction, status) => {
     setActionError("");
@@ -27,6 +45,7 @@ function Requestees() {
       status,
       pickup: update.pickup,
       pay: update.pay,
+      response: update.response,
       action: status === "AllowAgain" ? "allow_again" : "update_status", // ✅ NEW
     };
 
@@ -49,6 +68,8 @@ function Requestees() {
 
       if (data.Success) {
         setActionFeedback(data.message);
+        setActive(null);
+        await pushUserNotification(selectedUser.id, transaction, status);
 
         // Update UI instantly
         if (status === "AllowAgain") {
@@ -96,11 +117,12 @@ function Requestees() {
   }
 
   if (statusView === "Successful") {
-    return transactionMatch && user.status === "Successful"
-    &&
-      user.request_again === "0"
-    ;
-  }
+  return (
+    transactionMatch &&
+    (user.status === "Successful" || user.status === "Rejected") &&
+    user.request_again === '0'
+  );
+}
 
   return false;
 });
@@ -216,9 +238,13 @@ console.log("Filtered Users:", users);
   {selectedUser ? (
     <div className="flex flex-col gap-4">
 
-      <h2 className="text-2xl md:text-3xl font-semibold border-b pb-2">
+      <h2 className="text-2xl md:text-2xl font-semibold border-b pb-2 flex justify-between">
         {selectedUser.transaction}
+        <div className="inline-block px-4 py-1 rounded-full text-sm font-medium border-2 border-orange-400 bg-orange-100 text-orange-700 w-fit">
+        {selectedUser.status}
+      </div>
       </h2>
+      
 
       
 
@@ -226,18 +252,13 @@ console.log("Filtered Users:", users);
       {statusView === "Pending" && (
         <>
           {/* USER DETAILS */}
-          <div className="inline-block px-4 py-1 rounded-full text-sm font-medium border-2 border-orange-400 bg-orange-100 text-orange-700 w-fit">
-        {selectedUser.status}
-      </div>
+          
           <div className="flex flex-col text-gray-700 space-y-1">
             <div className="flex justify-between">
               <span className="font-medium">Name:</span>
               <span>{selectedUser.name}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="font-medium">Birthdate:</span>
-              <span>{selectedUser.birthdate}</span>
-            </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Date Requested:</span>
               <span>{selectedUser.date}</span>
@@ -253,6 +274,21 @@ console.log("Filtered Users:", users);
               {selectedUser.purpose}
             </p>
           </div>
+          {/* RESPONSE */}
+<div>
+  <label className="block font-medium text-gray-700 mb-1">
+    Admin Response
+  </label>
+  <textarea
+    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+    rows="3"
+    placeholder="Write response to user..."
+    value={update.response}
+    onChange={(e) =>
+      setUpdate((u) => ({ ...u, response: e.target.value }))
+    }
+  />
+</div>
 
           {/* PAYMENT & PICKUP */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

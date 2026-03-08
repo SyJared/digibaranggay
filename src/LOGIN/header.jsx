@@ -5,11 +5,12 @@ import { RoleContext } from "../rolecontext";
 import HeaderRequests from "./headerrequests";
 import Profile from "./profile";
 import NotificationBell from "./notif";
+import UserNotificationBell from "./userNotificationBell";
 
 function Header() {
   const { user, role, setRole } = useContext(RoleContext);
   const navigate = useNavigate();
-
+console.log("Header render - user:", user, "role:", role);
   const handleLogout = async () => {
     try {
       await fetch("http://localhost/digibaranggay/logout.php", {
@@ -46,6 +47,7 @@ if (!user) return null;
         <nav className="flex items-center gap-6">
           <Profile />
           {/* Pass user.id so HeaderRequests filters current user */}
+          <UserNotificationBell />
           <HeaderRequests filterUserId={user.id} />
           <button
             className="flex items-center gap-2 text-gray-700 hover:text-red-600 transition font-medium"

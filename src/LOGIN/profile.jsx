@@ -10,6 +10,9 @@ function Profile() {
   const{users} = useContext(RequestContext)
   // Get user's requests
   const userRequests = users.filter(req => String(req.id) === String( user.id)) || [];
+
+  
+  
   const statusBorder = {
     Approved : 'border-emerald-600',
     Pending : 'border-orange-400',

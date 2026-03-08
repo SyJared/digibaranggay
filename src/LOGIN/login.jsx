@@ -164,33 +164,52 @@ function Login() {
           </div>
           <div className="bg-white/15 backdrop-blur rounded-xl p-6">
             <p className="text-sm opacity-80">Successful requests</p>
-            <p className="text-3xl font-bold">{users.filter((u)=> u.status === 'Approved').length || '10  '}</p>
+            <p className="text-3xl font-bold">{users.filter((u)=> u.status === 'Successful').length || '0'}</p>
           </div>
         </div>
-{console.log(users)}
+
         {/* Available Requests */}
         <div>
-          <h3 className="text-2xl font-semibold mb-4">Available Requests</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            {[
-              "KKID Card",
-              "Barangay ID",
-              "Barangay Clearance",
-              "Working Clearance",
-              "OSCA",
-              "Certificate of Indigency",
-              "First Job Seeker",
-              "Barangay Inhabitants",
-            ].map((item) => (
-              <div
-                key={item}
-                className="bg-white/10 rounded-lg px-4 py-3 hover:bg-white/20 transition"
-              >
-                {item}
-              </div>
-            ))}
+  <h3 className="text-2xl font-semibold mb-4">Available Requests</h3>
+
+  {/** group successful transactions once */}
+  {(() => {
+    const transactions = [
+      "KKID Card",
+      "Barangay ID",
+      "Barangay clearance",
+      "Working clearance",
+      "OSCA",
+      "Certificate of indigency",
+      "First job seeker",
+      "Barangay inhabitants",
+    ];
+
+    const successfulByTransaction = users.reduce((acc, u) => {
+      if (u.status === "Successful") {
+        acc[u.transaction] = (acc[u.transaction] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+        {transactions.map((item) => (
+          <div
+            key={item}
+            className="flex justify-between items-center bg-white/10 rounded-lg px-4 py-3 hover:bg-white/20 transition"
+          >
+            <span>{item}</span>
+
+            <span className="text-xs opacity-80">
+              {successfulByTransaction[item] || 0} successful
+            </span>
           </div>
-        </div>
+        ))}
+      </div>
+    );
+  })()}
+</div>
       </div>
     </div>
   );

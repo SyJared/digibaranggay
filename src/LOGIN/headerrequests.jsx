@@ -117,6 +117,13 @@ function HeaderRequests({ filterUserId }) {
                     <p>{u.dateupdated}</p>
                   </div>
                   {u.pay && <p className="text-gray-800 font-medium">₱ {u.pay}</p>}
+                  {/* ✅ ADMIN RESPONSE */}
+{u.response && (
+  <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-sm text-emerald-800">
+    <p className="font-medium mb-1">Admin Response:</p>
+    <p className="leading-relaxed">{u.response}</p>
+  </div>
+)}
                   <p className="text-gray-500 text-xs">{u.date}</p>
                 </div>
               ))}
