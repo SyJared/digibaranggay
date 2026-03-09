@@ -40,7 +40,7 @@ function ManageUsers() {
     });
 
     const data = await res.json();
-    alert(JSON.stringify(data)); // ⚡ For testing, shows email + PIN info
+    
 
     if (!data.success) {
       setUserStatuses((prev) => ({ ...prev, [id]: registered.find(u => u.id === id).status }));

@@ -23,52 +23,56 @@ function Form() {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!form.firstname.trim() || !form.lastname.trim() || !form.email.trim() || !form.password) {
-      setMessage("Please fill in all required fields.");
-      return;
-    }
-    const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-    if (!emailPattern.test(form.email)) {
-      setMessage("Please enter a valid email address.");
-      return;
-    }
-    if (form.password !== confirmPassword) {
-      setMessage("Passwords do not match.");
-      return;
-    }
-    setMessage("Registration submitted — thank you!");
-    
-    try {
-      const res = await fetch("http://localhost/digibaranggay/register.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+  e.preventDefault();
+
+  if (!form.firstname.trim() || !form.lastname.trim() || !form.email.trim() || !form.password) {
+    setMessage("Please fill in all required fields.");
+    return;
+  }
+
+  const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  if (!emailPattern.test(form.email)) {
+    setMessage("Please enter a valid email address.");
+    return;
+  }
+
+  if (form.password !== confirmPassword) {
+    setMessage("Passwords do not match.");
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost/digibaranggay/register.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+
+    const data = await res.json();
+    setMessage(data.message);
+
+    if (data.success) {
+      setForm({
+        firstname: "",
+        middlename: "",
+        lastname: "",
+        email: "",
+        password: "",
+        address: "",
+        birthdate: "",
+        gender: "",
+        housenumber: "",
+        contactnumber: ""
       });
-      const data = await res.json();
-      setMessage(data.message);
-      
-      if (data.success) {
-        setForm({
-          firstname: "",
-          middlename: "",
-          lastname: "",
-          email: "",
-          password: "",
-          address: "",
-          birthdate: "",
-          gender: "",
-          housenumber: "",
-          contactnumber: ""
-        });
-        setConfirmPassword("");
-        setShowModal(true);
-      }
-    } catch (err) {
-      setMessage("Error submitting form");
-      console.error(err);
+      setConfirmPassword("");
+      setShowModal(true);
     }
-  };
+
+  } catch (err) {
+    console.error(err);
+    setMessage("Error submitting form");
+  }
+};
 
   return (
     <form className="form" onSubmit={handleSubmit}>
