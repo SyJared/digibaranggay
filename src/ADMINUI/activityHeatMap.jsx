@@ -1,7 +1,12 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { RegisteredContext } from "../registeredContext";
 
 function ActivityHeatmap({ users }) {
+  const { registered } = useContext(RegisteredContext);
+
   const [currentMonth, setCurrentMonth] = useState(() => {
     const today = new Date();
     return { year: today.getFullYear(), month: today.getMonth() };
@@ -21,7 +26,13 @@ function ActivityHeatmap({ users }) {
     }));
   };
 
-  const requestCountsByDate = users.reduce((acc, u) => {
+  // Filter users for the current month
+  const usersInMonth = users.filter(u => {
+    const d = new Date(u.date);
+    return d.getFullYear() === currentMonth.year && d.getMonth() === currentMonth.month;
+  });
+
+  const requestCountsByDate = usersInMonth.reduce((acc, u) => {
     const dateStr = new Date(u.date).toISOString().split("T")[0];
     acc[dateStr] = (acc[dateStr] || 0) + 1;
     return acc;
@@ -47,6 +58,36 @@ function ActivityHeatmap({ users }) {
 
   const maxCount = Math.max(...monthDays.map(d => d.count));
   const monthName = new Date(currentMonth.year, currentMonth.month).toLocaleString("default", { month: "long" });
+
+  // Generate PDF
+  const generatePDF = () => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(16);
+    doc.text("Request Report", 14, 20);
+    doc.setFontSize(12);
+    doc.text(`Month: ${monthName} ${currentMonth.year}`, 14, 30);
+
+    const tableData = usersInMonth.map((u, index) => [
+      index + 1,
+      u.name,        // Name
+      u.address,     // Address
+      u.purpose,     // Purpose
+      u.pay,         // Pay
+      u.date,        // Date
+      u.status,      // Status
+    ]);
+
+    autoTable(doc, {
+      head: [["#", "Name", "Address", "Purpose", "Pay", "Date", "Status"]],
+      body: tableData,
+      startY: 40,
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [16, 185, 129] }, // green header
+    });
+
+    doc.save(`Requests for ${monthName}.pdf`);
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-md border border-slate-200 p-4 max-w-[400px] mx-auto">
@@ -74,9 +115,15 @@ function ActivityHeatmap({ users }) {
         ))}
       </div>
 
-      {/* Max request */}
-      <div className="mt-2 text-[11px] text-gray-600 dark:text-gray-300 font-medium">
-        Max requests this month: {maxCount}
+      {/* Max request + Download PDF button */}
+      <div className="mt-2 flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-300 font-medium">
+        <div>Max requests this month: {maxCount}</div>
+        <button
+          onClick={generatePDF}
+          className="bg-emerald-600 text-white px-3 py-1.5 rounded hover:bg-emerald-700 transition text-[11px] font-medium"
+        >
+          Download PDF
+        </button>
       </div>
     </div>
   );
