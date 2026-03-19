@@ -105,6 +105,7 @@ export default function NotificationBell() {
 
   /* ================= OUTSIDE CLICK ================= */
   useEffect(() => {
+  if (!open) return; // do nothing if dropdown is closed
   function handleOutsideClick(e) {
     if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
       // Mark as read before closing
