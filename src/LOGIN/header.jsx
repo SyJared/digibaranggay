@@ -38,7 +38,7 @@ if (!user) return null;
           <span className="text-white font-bold text-lg">DB</span>
         </div>
         <span className="text-2xl font-semibold primary-color bg-clip-text text-transparent tracking-tight">
-          DigiBaranggay
+          DigiBarangay
         </span>
       </div>
 
