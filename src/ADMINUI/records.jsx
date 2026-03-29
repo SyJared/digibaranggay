@@ -78,6 +78,36 @@ function Records() {
   }
 };
 
+const handleDownload = async (userId, transaction) => {
+  try {
+    // Create form data
+    const formData = new FormData();
+    formData.append("id", userId);
+
+    const res = await fetch("http://localhost/digibaranggay/generate_doc.php", {
+      method: "POST",
+      body: formData, // send as form-data
+      credentials: "include", // if you need cookies/session
+    });
+
+    if (!res.ok) throw new Error("Server error");
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${transaction}.docx`; // optional: dynamic file name
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error(err);
+    alert(err.message);
+  }
+};
+
   const normalizedUsers = users.map((u) => ({
     ...u,
     status: (u.status || "").trim(),
@@ -180,9 +210,9 @@ function Records() {
                     <p className="text-slate-600">{u.purpose}</p>
                   </div>
 
-                  {/* ✅ Mark Successful Button */}
+                  {/* ✅ Mark Successful + Download Buttons */}
                   {u.status === "Approved" && (
-                    <div className="col-span-2 flex justify-end pt-2">
+                    <div className="col-span-2 flex justify-end gap-3 pt-2">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -191,6 +221,16 @@ function Records() {
                         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
                       >
                         Mark as Successful
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownload(u.id, u.transaction);
+                        }}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
+                      >
+                        Download
                       </button>
                     </div>
                   )}
