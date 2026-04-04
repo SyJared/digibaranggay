@@ -78,12 +78,13 @@ function Records() {
   }
 };
 
-const handleDownload = async (userId, transaction) => {
+const handleDownload = async (userId, transaction, purpose) => {
   try {
     // Create form data
     const formData = new FormData();
     formData.append("id", userId);
     formData.append("transaction", transaction);
+    formData.append("purpose", purpose);
 
     const res = await fetch("http://localhost/digibaranggay/generate_doc.php", {
       method: "POST",
@@ -227,7 +228,7 @@ const handleDownload = async (userId, transaction) => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDownload(u.id, u.transaction);
+                          handleDownload(u.id, u.transaction, u.purpose);
                         }}
                         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
                       >
