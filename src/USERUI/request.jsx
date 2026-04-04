@@ -31,7 +31,7 @@ function Requests() {
   const [requestMessage, setRequestMessage] = useState("");
   const [notifyMessage, setNotifyMessage] = useState("");
 
-  const transactionsWithAdditionalInfo = ["Barangay ID", "Brgy. clearance", "KKID Card"]; 
+  const transactionsWithAdditionalInfo = ["Barangay ID", "KKID Card", 'Working clearance']; 
   const [showAdditional, setShowAdditional] = useState(false);
   // ===== Payment & Icons =====
   const payment = {
@@ -133,30 +133,50 @@ function Requests() {
   if (!transaction) return setRequestMessage("Please select a transaction");
   if (!purpose.trim()) return setRequestMessage("Please enter a purpose");
 
-  // Check if this transaction requires additional info
   if (transactionsWithAdditionalInfo.includes(transaction)) {
     try {
       const res = await fetch("http://localhost/digibaranggay/additionalInfo.php", {
         method: "GET",
         credentials: "include",
       });
-      
-      const data = await res.json();
 
+      const data = await res.json();
       console.log("Additional Info response:", data);
-      const infoMissing =
-        !data.success ||
-        !data.additional_info?.height ||
-        !data.additional_info?.weight;
-      if (infoMissing) {
-        return setShowAdditional(true); // Open modal if missing
+
+      if (!data.success || !data.additional_info) {
+        return setShowAdditional(true);
       }
+
+      const info = data.additional_info;
+
+      let missing = false;
+
+      // ✅ Barangay ID requirement
+      if (transaction === "Barangay ID") {
+        missing = !info.height || !info.weight;
+      }
+
+      // ✅ Working Clearance requirement
+      if (transaction === "Working clearance") {
+        missing = !info.position || !info.employer;
+      }
+
+      // ✅ KKID (if you want same as ID)
+      if (transaction === "KKID Card") {
+        missing = !info.height || !info.weight;
+      }
+
+      if (missing) {
+        console.log("❌ Missing required fields");
+        return setShowAdditional(true);
+      }
+
     } catch (err) {
       console.error(err);
     }
   }
 
-  // Otherwise continue to PIN verification
+  // Continue to PIN
   setPendingRequest({ transaction, purpose });
   setShowVerify(true);
 };

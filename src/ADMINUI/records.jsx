@@ -9,6 +9,8 @@ function Records() {
 
   const statuses = ["All", "Approved", "Pending", "Rejected", "Expired", "Successful"];
 
+  const downloadableTransactions = ["Barangay ID", "Working clearance", "Brgy. clearance", "First job seeker"];
+
   const statusBorder = {
     Approved: "border-emerald-600",
     Pending: "border-orange-400",
