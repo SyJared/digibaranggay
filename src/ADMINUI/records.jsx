@@ -83,6 +83,7 @@ const handleDownload = async (userId, transaction) => {
     // Create form data
     const formData = new FormData();
     formData.append("id", userId);
+    formData.append("transaction", transaction);
 
     const res = await fetch("http://localhost/digibaranggay/generate_doc.php", {
       method: "POST",

@@ -1,0 +1,144 @@
+import { useState, useEffect } from "react";
+import { BookPlus } from "lucide-react";
+
+export default function AdditionalInfo({ isOpen: parentOpen, onClose: parentClose,  alertMessage  }) {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [form, setForm] = useState({ height: "", weight: "", tin: "" });
+
+  // Handle controlled vs internal open
+  const isControlled = parentOpen !== undefined && parentClose !== undefined;
+  const modalOpen = isControlled ? parentOpen : open;
+  const closeModal = () => {
+    if (isControlled) parentClose();
+    else setOpen(false);
+  };
+
+  useEffect(() => {
+    if (!modalOpen) return;
+
+    async function fetchData() {
+      try {
+        const res = await fetch("http://localhost/digibaranggay/additionalinfo.php", {
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await res.json();
+        if (data.success && data.additional_info) {
+          setForm({
+            height: data.additional_info.height ?? "",
+            weight: data.additional_info.weight ?? "",
+            tin: data.additional_info.tin ?? "",
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    fetchData();
+  }, [modalOpen]);
+
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("http://localhost/digibaranggay/additionalinfo.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      setMessage(data.message);
+      if (data.success) setTimeout(() => { setMessage(""); closeModal(); }, 1200);
+    } catch (err) {
+      console.error(err);
+      setMessage("Server error: " + err.message);
+    }
+  };
+
+  return (
+    <>
+      {/* Icon Button to open modal */}
+      {!isControlled && (
+        <button
+          onClick={() => setOpen(true)}
+          className="p-2 rounded-full hover:bg-gray-200 transition"
+          title="Additional Info"
+        >
+          <BookPlus size={22} />
+        </button>
+      )}
+
+      {/* Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white w-[400px] rounded-xl shadow-xl p-6 relative">
+            <button
+              onClick={closeModal}
+              className="absolute top-2 right-3 text-gray-500 hover:text-black text-lg"
+            >
+              ✕
+            </button>
+            <h2 className="text-xl font-semibold mb-4">Additional Info</h2>
+            {alertMessage && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2 mb-3">
+                {alertMessage}
+              </p>
+            )}
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+              <div>
+                <label className="text-sm">Height (cm)</label>
+                <input
+                  type="number"
+                  name="height"
+                  value={form.height}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded"
+                  placeholder="Enter height in cm"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-sm">Weight (kg)</label>
+                <input
+                  type="number"
+                  name="weight"
+                  value={form.weight}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded"
+                  placeholder="Enter weight in kg"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-sm">TIN (optional)</label>
+                <input
+                  type="text"
+                  name="tin"
+                  value={form.tin}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded"
+                  placeholder="Enter TIN"
+                />
+              </div>
+              <button
+                type="submit"
+                className="mt-3 primary-color text-white py-2 rounded hover:opacity-90"
+              >
+                Save
+              </button>
+              {message && (
+                <p className={`text-sm mt-2 ${message.includes("successfully") ? "text-green-600" : "text-red-600"}`}>
+                  {message}
+                </p>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

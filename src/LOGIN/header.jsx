@@ -6,6 +6,8 @@ import HeaderRequests from "./headerrequests";
 import Profile from "./profile";
 import NotificationBell from "./notif";
 import UserNotificationBell from "./userNotificationBell";
+import Emergency from "./emergency.";
+import AdditionalInfo from "./additionalInfo";
 
 function Header() {
   const { user, role, setRole } = useContext(RoleContext);
@@ -45,6 +47,8 @@ if (!user) return null;
       {/* Navigation */}
       {role === "user" && (
         <nav className="flex items-center gap-6">
+          <Emergency />
+          <AdditionalInfo />
           <Profile />
           {/* Pass user.id so HeaderRequests filters current user */}
           <UserNotificationBell />

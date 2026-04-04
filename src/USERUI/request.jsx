@@ -13,6 +13,7 @@ import {
 import Verify from "./verify"; // PIN modal
 import { RequestContext } from "../requestList";
 import { RoleContext } from "../rolecontext";
+import AdditionalInfo from "../LOGIN/additionalInfo";
 
 function Requests() {
   const { users } = useContext(RequestContext);
@@ -30,6 +31,8 @@ function Requests() {
   const [requestMessage, setRequestMessage] = useState("");
   const [notifyMessage, setNotifyMessage] = useState("");
 
+  const transactionsWithAdditionalInfo = ["Barangay ID", "Brgy. clearance", "KKID Card"]; 
+  const [showAdditional, setShowAdditional] = useState(false);
   // ===== Payment & Icons =====
   const payment = {
     "KKID Card": 0,
@@ -126,12 +129,38 @@ function Requests() {
     setIsVerified(true);
   };
 
-  const handleClick = () => {
-    if (!transaction) return setRequestMessage("Please select a transaction");
-    if (!purpose.trim()) return setRequestMessage("Please enter a purpose");
-    setPendingRequest({ transaction, purpose });
-    setShowVerify(true);
-  };
+  const handleClick = async () => {
+  if (!transaction) return setRequestMessage("Please select a transaction");
+  if (!purpose.trim()) return setRequestMessage("Please enter a purpose");
+
+  // Check if this transaction requires additional info
+  if (transactionsWithAdditionalInfo.includes(transaction)) {
+    try {
+      const res = await fetch("http://localhost/digibaranggay/additionalInfo.php", {
+        method: "GET",
+        credentials: "include",
+      });
+      
+      const data = await res.json();
+
+      console.log("Additional Info response:", data);
+      const infoMissing =
+        !data.success ||
+        !data.additional_info?.height ||
+        !data.additional_info?.weight;
+      if (infoMissing) {
+        return setShowAdditional(true); // Open modal if missing
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // Otherwise continue to PIN verification
+  setPendingRequest({ transaction, purpose });
+  setShowVerify(true);
+};
+
 
   const handlePinSubmit = async (pin) => {
     try {
@@ -331,6 +360,11 @@ function Requests() {
         isOpen={showVerify}
         onClose={() => setShowVerify(false)}
         onSubmit={handlePinSubmit}
+      />
+      <AdditionalInfo
+        isOpen={showAdditional}
+        onClose={() => setShowAdditional(false)}
+        alertMessage="Please fill in your additional info before submitting a request."
       />
     </>
   );
