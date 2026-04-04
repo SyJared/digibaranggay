@@ -42,7 +42,9 @@ export default function NotificationBell() {
     [notifications]
   );
 
-  const totalBadge = notifications.filter((n) => n.is_read === 0).length;
+  const totalBadge = notifications.filter(
+  (n) => n.is_read === 0 && ["new", "request_again", "admin"].includes(n.type)
+).length;
 
   const currentList = useMemo(() => {
     if (activeTab === "new") return newUnread;
