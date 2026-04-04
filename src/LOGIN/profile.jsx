@@ -11,13 +11,15 @@ function Profile() {
 
   const [editData, setEditData] = useState({
     firstname: user.firstname,
+    middlename: user.middlename || "",
     lastname: user.lastname,
     email: user.email,
     contactnumber: user.contactnumber || "",
     birthdate: user.birthdate || "",
     gender: user.gender || "",
     civilstatus: user.civilstatus || "",
-    address: user.address || "",
+    sitio: user.sitio || "",
+    street: user.street || "",
   });
 
   const userRequests = users.filter(req => String(req.id) === String(user.id)) || [];
@@ -97,13 +99,15 @@ function Profile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 bg-gray-50 p-6 rounded-lg">
                 {[
                   { label: "First Name", key: "firstname" },
+                  { label: "Middle Name", key: "middlename" },
                   { label: "Last Name", key: "lastname" },
                   { label: "Email", key: "email" },
                   { label: "Contact Number", key: "contactnumber" },
                   { label: "Date of Birth", key: "birthdate" },
                   { label: "Gender", key: "gender" },
                   { label: "Civil Status", key: "civilstatus" },
-                  { label: "Address", key: "address" },
+                  { label: "Sitio", key: "sitio" },
+                  { label: "Street", key: "street" },
                 ].map(field => (
                   <div key={field.key}>
                     <p className="text-sm font-semibold text-gray-600">{field.label}</p>
@@ -151,7 +155,9 @@ function Profile() {
             birthdate: user.birthdate || "",
             gender: user.gender || "",
             civilstatus: user.civilstatus || "",
-            address: user.address || "",
+            sitio: user.sitio || "",
+            street: user.street || "",
+            middlename: user.middlename || "",
           });
         }}
         className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"

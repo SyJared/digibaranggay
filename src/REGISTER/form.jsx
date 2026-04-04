@@ -4,16 +4,17 @@ import { Link } from "react-router";
 
 function Form() {
   const [form, setForm] = useState({
-    firstname: "",
-    middlename: "",
-    lastname: "",
-    email: "",
-    password: "",
-    address: "",
-    birthdate: "",
-    gender: "",
-    housenumber: "",
-    contactnumber: ""
+  firstname: "",
+  middlename: "",
+  lastname: "",
+  email: "",
+  password: "",
+  sitio: "",
+  street: "",
+  birthdate: "",
+  gender: "",
+  housenumber: "",
+  contactnumber: ""
   });
 
   const [showModal, setShowModal] = useState(false);
@@ -58,7 +59,8 @@ function Form() {
         lastname: "",
         email: "",
         password: "",
-        address: "",
+        sitio: "",
+        street: "", 
         birthdate: "",
         gender: "",
         housenumber: "",
@@ -107,10 +109,15 @@ function Form() {
           <input id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="Enter your email" required />
         </div>
 
-        {/* Address */}
+        {/* sitio street */}
         <div>
-          <label htmlFor="address">Address</label>
-          <input id="address" name="address" type="text" value={form.address} onChange={handleChange} placeholder="Enter your address" />
+          <label htmlFor="sitio">Sitio</label>
+          <input id="sitio" name="sitio" type="text" value={form.sitio} onChange={handleChange} placeholder="Enter your sitio" />
+        </div>
+
+        <div>
+          <label htmlFor="street">Street</label>
+          <input id="street" name="street" type="text" value={form.street} onChange={handleChange} placeholder="Enter your street" />
         </div>
 
         {/* Household Number */}

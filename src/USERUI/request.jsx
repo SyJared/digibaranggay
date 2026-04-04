@@ -266,7 +266,7 @@ function Requests() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div><p className="font-semibold text-gray-700">Address</p><span className="text-gray-800">{user.address}</span></div>
+              <div><p className="font-semibold text-gray-700">Street & Sitio</p><span className="text-gray-800">{user.sitio}, {user.street}</span></div>
               <div><p className="font-semibold text-gray-700">Birthdate</p><span className="text-gray-800">{user.birthdate}</span></div>
               <div><p className="font-semibold text-gray-700">Contact</p><span className="text-gray-800">{user.contactnumber}</span></div>
               <div><p className="font-semibold text-gray-700">Civil Status</p><span className="text-gray-800">{user.civilstatus}</span></div>

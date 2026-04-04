@@ -120,7 +120,7 @@ function ManageUsers() {
                 <div className="font-semibold text-lg text-slate-900">
                   {r.firstname} {r.middlename} {r.lastname}
                 </div>
-                <div className="text-sm text-slate-500 mt-1">{r.address}</div>
+                <div className="text-sm text-slate-500 mt-1">Brgy. Binan Pagsanajan, Laguna</div>
               </div>
               <div className={`text-slate-400 transition-transform duration-300 flex-shrink-0 ${isExpanded ? "text-emerald-600 rotate-180" : ""}`}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
@@ -134,7 +134,8 @@ function ManageUsers() {
               <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border-t border-emerald-200 p-5 space-y-3">
 
                 <InfoRow label="Name" value={`${r.firstname} ${r.middlename} ${r.lastname}`} />
-                <InfoRow label="Address" value={r.address} />
+                <InfoRow label="Sitio" value={r.sitio} />
+                <InfoRow label="Street" value={r.street} />
                 <InfoRow label="Email" value={r.email} />
                 <InfoRow label="Contact Number" value={r.contactnumber} />
                 <InfoRow label="Civil Status" value={r.civilstatus} />
