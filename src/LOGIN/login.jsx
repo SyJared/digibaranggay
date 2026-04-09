@@ -17,7 +17,7 @@ function Login() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("http://localhost/digibaranggay/checkAuth.php", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/checkAuth.php`, {
           method: "GET",
           credentials: "include",
         });
@@ -50,7 +50,7 @@ function Login() {
     setMessage("");
 
     try {
-      const res = await fetch("http://localhost/digibaranggay/login.php", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -61,7 +61,7 @@ function Login() {
 
       if (data.success) {
         // Fetch session immediately
-        const authRes = await fetch("http://localhost/digibaranggay/checkAuth.php", {
+        const authRes = await fetch(`${import.meta.env.VITE_API_URL}/api/checkAuth.php`, {
           method: "GET",
           credentials: "include"
         });
@@ -86,7 +86,7 @@ function Login() {
   const navigateToRegister = () => navigate("/REGISTER/register");
 
   return (
-    <div className="min-h-screen grid grid-cols-1 md:grid-cols-3 bg-gray-100">
+    <div className="min-h-screen flex flex-col md:grid md:grid-cols-3 bg-gray-100">
       {/* LEFT — LOGIN */}
       <div className="md:col-span-1 flex items-center justify-center p-8 bg-white shadow-xl">
         <div className="w-full max-w-sm space-y-6">

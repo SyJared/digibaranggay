@@ -10,7 +10,7 @@ export default function NotificationBell() {
   /* ================= FETCH NOTIFICATIONS ================= */
   async function fetchNotifications() {
     try {
-      const res = await fetch("http://localhost/digibaranggay/get_notifications.php", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/get_notifications.php`, {
         credentials: "include",
       });
       const data = await res.json();
@@ -58,7 +58,7 @@ export default function NotificationBell() {
     if (list.length === 0) return;
     await Promise.all(
       list.map((n) =>
-        fetch("http://localhost/digibaranggay/mark_notification_read.php", {
+        fetch(`${import.meta.env.VITE_API_URL}/api/mark_notification_read.php`, {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },

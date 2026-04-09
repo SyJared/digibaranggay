@@ -13,7 +13,7 @@ export function RequestProvider({ children }) {
 
   const fetchRequests = async () => {
     try {
-      const res = await fetch("http://localhost/digibaranggay/requestees.php");
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/requestees.php`);
       const result = await res.json();
       if (result.success) {
         setUsers(result.data);

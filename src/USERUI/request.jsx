@@ -102,7 +102,7 @@ function Requests() {
     const checkAuth = async () => {
       if (!user) {
         try {
-          const res = await fetch("http://localhost/digibaranggay/checkAuth.php", {
+          const res = await fetch(`${import.meta.env.VITE_API_URL}/api/checkAuth.php`, {
             method: "GET",
             credentials: "include"
           });
@@ -135,7 +135,7 @@ function Requests() {
 
   if (transactionsWithAdditionalInfo.includes(transaction)) {
     try {
-      const res = await fetch("http://localhost/digibaranggay/additionalInfo.php", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/additionalInfo.php`, {
         method: "GET",
         credentials: "include",
       });
@@ -184,7 +184,7 @@ function Requests() {
 
   const handlePinSubmit = async (pin) => {
     try {
-      const res = await fetch("http://localhost/digibaranggay/request.php", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/request.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -207,7 +207,7 @@ function Requests() {
   const handleNotifyAdmin = async () => {
     if (!existingRequest) return;
     try {
-      const res = await fetch("http://localhost/digibaranggay/notify_request_again.php", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/notify_request_again.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

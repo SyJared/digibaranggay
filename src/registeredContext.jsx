@@ -16,7 +16,7 @@ export function RegisteredProvider({ children }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost/digibaranggay/showtable.php")
+    fetch(`${import.meta.env.VITE_API_URL}/api/showtable.php`)
       .then(res => res.json())
       .then(result => {
         if (result.success && result.data.length > 0) {

@@ -32,7 +32,7 @@ export default function UserNotificationBell() {
 
     try {
       const res = await fetch(
-        "http://localhost/digibaranggay/get_user_notifications.php",
+        `${import.meta.env.VITE_API_URL}/api/get_user_notifications.php`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -45,7 +45,7 @@ export default function UserNotificationBell() {
 
       if (data.success) {
         setNotifications(data.data || []);
-        console.log("Fetched user notifications:", data);
+        
       }
     } catch (err) {
       console.error(err);
@@ -72,7 +72,7 @@ export default function UserNotificationBell() {
   try {
     await Promise.all(
       unread.map(n =>
-        fetch("http://localhost/digibaranggay/mark_user_notification_read.php", {
+        fetch(`${import.meta.env.VITE_API_URL}/api/mark_user_notification_read.php`, {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -147,55 +147,50 @@ export default function UserNotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-3 w-96 bg-white shadow-xl rounded-xl border z-50">
+  <div className="
+    fixed left-1/2 -translate-x-1/2 top-16 w-[95vw]
+    md:absolute md:left-auto md:translate-x-0 md:top-full md:right-0 md:w-96 md:mt-3
+    bg-white shadow-xl rounded-xl border z-50
+  ">
+    <div className="p-4 md:p-5 border-b">
+      <h2 className="font-bold text-lg">Notifications</h2>
+    </div>
 
-          <div className="p-5 border-b">
-            <h2 className="font-bold text-lg">Notifications</h2>
-          </div>
-
-          <div className="max-h-[400px] overflow-y-auto divide-y">
-
-            {notifications.length === 0 && (
-              <div className="p-10 text-center text-gray-400">
-                No notifications yet
-              </div>
-            )}
-
-            {notifications.map((n) => (
-              <div
-                key={n.id}
-                className={`p-4 transition cursor-pointer ${
-                  n.user_read === 0
-                    ? "bg-teal-50 hover:bg-teal-100"
-                    : "bg-white hover:bg-gray-50"
-                }`}
-              >
-                <div className="flex justify-between gap-3">
-
-                  <div className="flex-1 space-y-1">
-
-                    {n.user_read === 0 && (
-                      <span className="w-2 h-2 rounded-full bg-teal-500 inline-block mr-2" />
-                    )}
-
-                    <p className="text-sm text-gray-800 inline">{n.message}</p>
-
-                    <p className="text-xs text-gray-500 mt-1">
-                      Transaction: {n.transaction}
-                    </p>
-                  </div>
-
-                  <span className="text-xs text-gray-400 whitespace-nowrap">
-                    {getRelativeTime(n.created_at)}
-                  </span>
-
-                </div>
-              </div>
-            ))}
-
-          </div>
+    <div className="max-h-[60vh] md:max-h-[400px] overflow-y-auto divide-y">
+      {notifications.length === 0 && (
+        <div className="p-10 text-center text-gray-400">
+          No notifications yet
         </div>
       )}
+
+      {notifications.map((n) => (
+        <div
+          key={n.id}
+          className={`p-3 md:p-4 transition cursor-pointer ${
+            n.user_read === 0
+              ? "bg-teal-50 hover:bg-teal-100"
+              : "bg-white hover:bg-gray-50"
+          }`}
+        >
+          <div className="flex justify-between gap-3">
+            <div className="flex-1 space-y-1">
+              {n.user_read === 0 && (
+                <span className="w-2 h-2 rounded-full bg-teal-500 inline-block mr-2" />
+              )}
+              <p className="text-sm text-gray-800 inline">{n.message}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Transaction: {n.transaction}
+              </p>
+            </div>
+            <span className="text-xs text-gray-400 whitespace-nowrap">
+              {getRelativeTime(n.created_at)}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
     </div>
   );

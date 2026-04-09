@@ -43,7 +43,7 @@ function Form() {
   }
 
   try {
-    const res = await fetch("http://localhost/digibaranggay/register.php", {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/register.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),

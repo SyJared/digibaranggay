@@ -27,7 +27,7 @@ function Adhome() {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const res = await fetch("http://localhost/digibaranggay/checkAuth.php", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/checkAuth.php`, {
           method: "GET",
           credentials: "include", // important for PHP session
         });
@@ -90,9 +90,9 @@ function Adhome() {
       )}
 
       {active === "Make announcement" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 max-w-[600px] mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-6 max-w-[300px] mx-auto">
           <StatCard label="Total" value={announcement.length} />
-          <StatCard label="Urgent" value={2} />
+          
         </div>
       )}
 

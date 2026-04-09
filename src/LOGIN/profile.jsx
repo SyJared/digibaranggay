@@ -39,7 +39,7 @@ function Profile() {
 
   const handleSave = async () => {
     try {
-      const res = await fetch("http://localhost/digibaranggay/update_profile.php", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/update_profile.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: user.id, ...editData }),

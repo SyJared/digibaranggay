@@ -56,86 +56,91 @@ function HeaderRequests({ filterUserId }) {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-[500px] bg-white border border-gray-200 rounded-lg shadow-xl z-50">
-          {/* Search */}
-          <div className="p-4 border-b border-gray-200">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search by name or transaction..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm("")}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                >
-                  <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
-                </button>
-              )}
+  <div className="
+    fixed left-1/2 -translate-x-1/2 top-16 w-[95vw]
+    md:absolute md:left-auto md:translate-x-0 md:top-full md:right-0 md:w-[500px] md:mt-2
+    bg-white border border-gray-200 rounded-lg shadow-xl z-50
+  ">
+    
+    {/* Search */}
+    <div className="p-3 md:p-4 border-b border-gray-200">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm"
+        />
+        {searchTerm && (
+          <button
+            onClick={() => setSearchTerm("")}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2"
+          >
+            <X className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+          </button>
+        )}
+      </div>
+    </div>
+
+    {/* Filters */}
+    <div className="p-3 md:p-4 border-b border-gray-200 flex flex-wrap gap-1 md:gap-2">
+      {filters.map(filter => (
+        <button
+          key={filter}
+          onClick={() => setActiveFilter(filter)}
+          className={`px-2 md:px-3 py-1 md:py-2 rounded-full font-medium text-xs transition ${
+            activeFilter === filter
+              ? "bg-emerald-600 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
+        >
+          {filter}
+        </button>
+      ))}
+    </div>
+
+    {/* Requests List */}
+    {listingError ? (
+      <div className="p-4 text-red-600 text-sm text-center">{listingError}</div>
+    ) : filteredUsers.length > 0 ? (
+      <div className="max-h-[60vh] overflow-y-auto">
+        {filteredUsers.map((u, index) => (
+          <div
+            key={index}
+            className="border-b last:border-b-0 p-3 md:p-5 hover:bg-gray-50 transition cursor-pointer flex flex-col gap-1 md:gap-2"
+          >
+            <div className="flex justify-between items-center gap-2">
+              <h3 className="font-semibold text-gray-800 text-sm md:text-lg truncate">{u.name}</h3>
+              <span className={`text-xs px-2 py-1 rounded-full font-medium shrink-0 ${getStatusColor(u.status)}`}>
+                {u.status}
+              </span>
             </div>
+            <div className="flex justify-between items-center text-gray-600 text-xs md:text-sm gap-2">
+              <p className="truncate">{u.transaction}</p>
+              <p className="shrink-0">{u.dateupdated}</p>
+            </div>
+            {u.pay && <p className="text-gray-800 font-medium text-sm">₱ {u.pay}</p>}
+            {u.response && (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2 md:p-3 text-xs md:text-sm text-emerald-800">
+                <p className="font-medium mb-1">Admin Response:</p>
+                <p className="leading-relaxed">{u.response}</p>
+              </div>
+            )}
+            <p className="text-gray-500 text-xs">{u.date}</p>
           </div>
-
-          {/* Filters */}
-          <div className="p-4 border-b border-gray-200 flex flex-wrap gap-2">
-            {filters.map(filter => (
-              <button
-                key={filter}
-                onClick={() => setActiveFilter(filter)}
-                className={`px-3 py-2 rounded-full font-medium text-xs transition ${
-                  activeFilter === filter
-                    ? "bg-emerald-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
-
-          {/* Requests List */}
-          {listingError ? (
-            <div className="p-6 text-red-600 text-sm text-center">{listingError}</div>
-          ) : filteredUsers.length > 0 ? (
-            <div className="max-h-[500px] overflow-y-auto">
-              {filteredUsers.map((u, index) => (
-                <div
-                  key={index}
-                  className="border-b last:border-b-0 p-5 hover:bg-gray-50 transition cursor-pointer flex flex-col gap-2"
-                >
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-semibold text-gray-800 text-lg">{u.name}</h3>
-                    <span className={`text-xs px-3 py-1 rounded-full font-medium ${getStatusColor(u.status)}`}>
-                      {u.status}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-gray-600 text-sm">
-                    <p>{u.transaction}</p>
-                    <p>{u.dateupdated}</p>
-                  </div>
-                  {u.pay && <p className="text-gray-800 font-medium">₱ {u.pay}</p>}
-                  {/* ✅ ADMIN RESPONSE */}
-{u.response && (
-  <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-sm text-emerald-800">
-    <p className="font-medium mb-1">Admin Response:</p>
-    <p className="leading-relaxed">{u.response}</p>
+        ))}
+      </div>
+    ) : (
+      <div className="p-6 text-gray-500 text-center">
+        <MessageSquare className="w-6 h-6 mx-auto mb-2 opacity-50" />
+        <p className="text-sm">No requests found</p>
+      </div>
+    )}
   </div>
 )}
-                  <p className="text-gray-500 text-xs">{u.date}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="p-8 text-gray-500 text-center">
-              <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No requests found</p>
-            </div>
-          )}
-        </div>
-      )}
+   
     </div>
   );
 }

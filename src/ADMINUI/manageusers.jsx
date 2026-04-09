@@ -45,7 +45,7 @@ const [messageModal, setMessageModal] = useState({ show: false, message: "", suc
     setShowModal(false);
     setMessageModal({ show: true, message: "Updating status...", success: null });
 
-    const res = await fetch("http://localhost/digibaranggay/updateStatus.php", {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/updateStatus.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, status: newStatus }),

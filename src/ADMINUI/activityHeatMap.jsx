@@ -4,6 +4,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { RegisteredContext } from "../registeredContext";
 
+
 function ActivityHeatmap({ users }) {
   const { registered } = useContext(RegisteredContext);
 

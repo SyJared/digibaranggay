@@ -12,7 +12,7 @@ export function AnnouncementList({children}){
   const [message, setMessage] = useState('')
 
   useEffect(()=>{
-    fetch("http://localhost/digibaranggay/announcement.php").then(res => res.json())
+    fetch(`${import.meta.env.VITE_API_URL}/api/announcement.php`).then(res => res.json())
     .then(result => {
       if(result.success === true){
         setAnnouncement(result.data)

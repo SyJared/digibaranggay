@@ -15,7 +15,7 @@ export default function Emergency() {
   useEffect(() => {
     async function fetchEmergency() {
       try {
-        const res = await fetch("http://localhost/digibaranggay/emergency.php", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/emergency.php`, {
           method: "GET",
           credentials: "include",
         });
@@ -43,7 +43,7 @@ export default function Emergency() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost/digibaranggay/emergency.php", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/emergency.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

@@ -65,7 +65,7 @@ function Announcement(){
     formData.append("title", state.create.title);
     formData.append("body", state.create.body);
 
-    const res =await fetch("http://localhost/digibaranggay/announcement.php",{
+    const res =await fetch(`${import.meta.env.VITE_API_URL}/api/announcement.php`,{
       method : "POST",
       body: formData
     })
@@ -81,7 +81,7 @@ const HandleRemoveClick = async()=>{
     const formData = new FormData();
     formData.append('action', 'remove');
     formData.append('id', state.edit.id);
-    const res = await fetch("http://localhost/digibaranggay/announcement.php",{
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/announcement.php`,{
     method : "POST",
     body : formData
     })
@@ -101,7 +101,7 @@ const HandleRemoveClick = async()=>{
     formData.append('title', state.edit.title);
     formData.append('body', state.edit.body);
 
-    const res = await fetch("http://localhost/digibaranggay/announcement.php",{
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/announcement.php`,{
     method : "POST",
     body : formData
     })
