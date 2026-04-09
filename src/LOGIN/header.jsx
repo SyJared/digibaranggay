@@ -25,7 +25,7 @@ function Header() {
 
     const data = JSON.parse(text);
     if (data.success) {
-      setUser(null);
+
       setRole(null);
       navigate("/LOGIN/login");
     }
