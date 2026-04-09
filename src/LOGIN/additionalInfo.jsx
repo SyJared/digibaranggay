@@ -12,7 +12,7 @@ export default function AdditionalInfo({ isOpen: parentOpen, onClose: parentClos
     employer: ""
   });
 
-  // Handle controlled vs internal open
+  // Controlled vs internal
   const isControlled = parentOpen !== undefined && parentClose !== undefined;
   const modalOpen = isControlled ? parentOpen : open;
 
@@ -50,12 +50,8 @@ export default function AdditionalInfo({ isOpen: parentOpen, onClose: parentClos
     fetchData();
   }, [modalOpen]);
 
-  // Handle input change
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -97,8 +93,8 @@ export default function AdditionalInfo({ isOpen: parentOpen, onClose: parentClos
 
       {/* Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white w-[400px] rounded-xl shadow-xl p-6 relative">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-md md:max-w-lg rounded-xl shadow-xl p-6 relative flex flex-col max-h-[90vh]">
 
             {/* Close */}
             <button
@@ -116,12 +112,12 @@ export default function AdditionalInfo({ isOpen: parentOpen, onClose: parentClos
               </p>
             )}
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* Scrollable Form */}
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2">
 
               {/* ===== Barangay ID Section ===== */}
               <div>
                 <h3 className="text-md font-semibold mb-2">For Barangay ID</h3>
-
                 <div className="flex flex-col gap-3">
                   <div>
                     <label className="text-sm">Height (cm)</label>
@@ -166,7 +162,6 @@ export default function AdditionalInfo({ isOpen: parentOpen, onClose: parentClos
               {/* ===== Barangay Clearance Section ===== */}
               <div className="border-t pt-3">
                 <h3 className="text-md font-semibold mb-2">For Barangay Clearance</h3>
-
                 <div className="flex flex-col gap-3">
                   <div>
                     <label className="text-sm">Position</label>

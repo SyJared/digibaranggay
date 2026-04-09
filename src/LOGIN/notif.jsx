@@ -43,8 +43,8 @@ export default function NotificationBell() {
   );
 
   const totalBadge = notifications.filter(
-  (n) => n.is_read === 0 && ["new", "request_again", "admin"].includes(n.type)
-).length;
+    (n) => n.is_read === 0 && ["new", "request_again", "admin"].includes(n.type)
+  ).length;
 
   const currentList = useMemo(() => {
     if (activeTab === "new") return newUnread;
@@ -73,15 +73,15 @@ export default function NotificationBell() {
 
   /* ================= BELL CLICK ================= */
   function handleClick() {
-  const newOpen = !open;
-  setOpen(newOpen);
+    const newOpen = !open;
+    setOpen(newOpen);
 
-  // Only mark as read when closing
-  if (!newOpen) {
-    const allUnread = notifications.filter((n) => n.is_read === 0);
-    markAllAsRead(allUnread);
+    // Only mark as read when closing
+    if (!newOpen) {
+      const allUnread = notifications.filter((n) => n.is_read === 0);
+      markAllAsRead(allUnread);
+    }
   }
-}
 
   /* ================= RELATIVE TIME ================= */
   function getRelativeTime(date) {
@@ -98,28 +98,24 @@ export default function NotificationBell() {
     ];
     for (const [unit, value] of intervals) {
       const diff = seconds / value;
-      if (Math.abs(diff) >= 1) {
-        return rtf.format(-Math.round(diff), unit);
-      }
+      if (Math.abs(diff) >= 1) return rtf.format(-Math.round(diff), unit);
     }
     return "just now";
   }
 
   /* ================= OUTSIDE CLICK ================= */
   useEffect(() => {
-  if (!open) return; // do nothing if dropdown is closed
-  function handleOutsideClick(e) {
-    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-      // Mark as read before closing
-      const allUnread = notifications.filter((n) => n.is_read === 0);
-      markAllAsRead(allUnread);
-
-      setOpen(false);
+    if (!open) return; // do nothing if dropdown is closed
+    function handleOutsideClick(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        const allUnread = notifications.filter((n) => n.is_read === 0);
+        markAllAsRead(allUnread);
+        setOpen(false);
+      }
     }
-  }
-  document.addEventListener("mousedown", handleOutsideClick);
-  return () => document.removeEventListener("mousedown", handleOutsideClick);
-}, [notifications]);
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [notifications]);
 
   /* ================= RENDER ================= */
   return (
@@ -137,8 +133,9 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-3 w-120 bg-white shadow-xl rounded-xl border z-50">
-          <div className="p-5 border-b">
+        <div className="absolute right-0 mt-3 w-[90vw] max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl bg-white shadow-xl rounded-xl border z-50">
+          {/* Header */}
+          <div className="p-4 border-b">
             <h2 className="font-bold text-lg">Notifications</h2>
           </div>
 
@@ -146,7 +143,7 @@ export default function NotificationBell() {
           <div className="flex border-b text-sm font-medium">
             <button
               onClick={() => setActiveTab("new")}
-              className={`flex-1 py-3 ${
+              className={`flex-1 py-2 sm:py-3 ${
                 activeTab === "new"
                   ? "border-b-2 border-teal-600 text-teal-600"
                   : "text-gray-500"
@@ -156,7 +153,7 @@ export default function NotificationBell() {
             </button>
             <button
               onClick={() => setActiveTab("again")}
-              className={`flex-1 py-3 ${
+              className={`flex-1 py-2 sm:py-3 ${
                 activeTab === "again"
                   ? "border-b-2 border-amber-500 text-amber-600"
                   : "text-gray-500"
@@ -166,7 +163,7 @@ export default function NotificationBell() {
             </button>
             <button
               onClick={() => setActiveTab("registrant")}
-              className={`flex-1 py-3 ${
+              className={`flex-1 py-2 sm:py-3 ${
                 activeTab === "registrant"
                   ? "border-b-2 border-indigo-600 text-indigo-600"
                   : "text-gray-500"
@@ -176,9 +173,10 @@ export default function NotificationBell() {
             </button>
           </div>
 
-          <div className="max-h-[400px] overflow-y-auto divide-y">
+          {/* Notifications List Wrapper (scrollable) */}
+          <div className="p-2 sm:p-3 max-h-[70vh] overflow-y-auto divide-y">
             {currentList.length === 0 && (
-              <div className="p-10 text-center text-gray-400">No notifications</div>
+              <div className="p-6 text-center text-gray-400">No notifications</div>
             )}
 
             {currentList.map((n) => (
@@ -190,22 +188,22 @@ export default function NotificationBell() {
                     : "bg-white hover:bg-gray-50"
                 }`}
               >
-                <div className="flex justify-between gap-3">
-                  <div className="flex-1 space-y-1">
-                    <div className="font-semibold text-gray-900 flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-3">
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="font-semibold text-gray-900 flex items-center gap-2 truncate">
                       {n.is_read === 0 && (
                         <span className="w-2 h-2 rounded-full bg-teal-500 shrink-0" />
                       )}
-                      <span>
+                      <span className="truncate">
                         {n.firstname} {n.lastname}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-800">{n.message}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm text-gray-800 truncate">{n.message}</p>
+                    <p className="text-xs text-gray-500 truncate">
                       Transaction: {n.transaction}
                     </p>
                   </div>
-                  <span className="text-xs text-gray-400 whitespace-nowrap">
+                  <span className="text-xs text-gray-400 whitespace-nowrap mt-1 sm:mt-0">
                     {getRelativeTime(n.created_at)}
                   </span>
                 </div>

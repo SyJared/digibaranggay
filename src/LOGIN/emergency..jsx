@@ -21,7 +21,6 @@ export default function Emergency() {
         });
         const data = await res.json();
         if (data.success && data.emergency) {
-          // Pre-fill the form inputs
           setForm({
             emergency_name: data.emergency.emergency_name || "",
             emergency_contact: data.emergency.emergency_contact || "",
@@ -33,12 +32,10 @@ export default function Emergency() {
         console.error("Error fetching emergency info:", err);
       }
     }
-    fetchEmergency();
-  }, []);
+    if (open) fetchEmergency();
+  }, [open]);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,8 +79,8 @@ export default function Emergency() {
 
       {/* MODAL */}
       {open && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white w-[400px] rounded-xl shadow-xl p-6 relative">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-md md:max-w-lg rounded-xl shadow-xl p-6 relative flex flex-col max-h-[90vh]">
 
             {/* CLOSE BUTTON */}
             <button
@@ -95,7 +92,9 @@ export default function Emergency() {
 
             <h2 className="text-xl font-semibold mb-4">Emergency Contact</h2>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            {/* SCROLLABLE FORM */}
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2">
+
               <div>
                 <label className="text-sm">Full Name</label>
                 <input
@@ -156,9 +155,7 @@ export default function Emergency() {
               </button>
 
               {message && (
-                <p className={`text-sm mt-2 ${
-                  message.includes("successfully") ? "text-green-600" : "text-red-600"
-                }`}>
+                <p className={`text-sm mt-2 ${message.includes("successfully") ? "text-green-600" : "text-red-600"}`}>
                   {message}
                 </p>
               )}

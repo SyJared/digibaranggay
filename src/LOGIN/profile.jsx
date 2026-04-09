@@ -73,6 +73,7 @@ function Profile() {
       {isOpen && (
         <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+            
             {/* Header */}
             <div className="sticky top-0 flex justify-between items-center p-6 border-b bg-gradient-to-br from-emerald-600 to-teal-600">
               <h2 className="text-2xl font-bold text-white">Profile</h2>
@@ -125,81 +126,86 @@ function Profile() {
                 ))}
               </div>
 
-            
-              {/* Edit / Save / Cancel Buttons Below Info */}
-<div className="flex justify-center gap-4 mb-6">
-  {!isEditing && (
-    <button
-      onClick={() => setIsEditing(true)}
-      className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-500 transition"
-    >
-      Edit Info
-    </button>
-  )}
-  {isEditing && (
-    <>
-      <button
-        onClick={handleSave}
-        className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 transition"
-      >
-        Save Changes
-      </button>
-      <button
-        onClick={() => {
-          setIsEditing(false);
-          setEditData({
-            firstname: user.firstname,
-            lastname: user.lastname,
-            email: user.email,
-            contactnumber: user.contactnumber || "",
-            birthdate: user.birthdate || "",
-            gender: user.gender || "",
-            civilstatus: user.civilstatus || "",
-            sitio: user.sitio || "",
-            street: user.street || "",
-            middlename: user.middlename || "",
-          });
-        }}
-        className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
-      >
-        Cancel
-      </button>
-    </>
-  )}
-</div>
+              {/* Edit / Save / Cancel Buttons */}
+              <div className="flex justify-center gap-4 mb-6">
+                {!isEditing && (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-500 transition"
+                  >
+                    Edit Info
+                  </button>
+                )}
+                {isEditing && (
+                  <>
+                    <button
+                      onClick={handleSave}
+                      className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 transition"
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditData({
+                          firstname: user.firstname,
+                          lastname: user.lastname,
+                          email: user.email,
+                          contactnumber: user.contactnumber || "",
+                          birthdate: user.birthdate || "",
+                          gender: user.gender || "",
+                          civilstatus: user.civilstatus || "",
+                          sitio: user.sitio || "",
+                          street: user.street || "",
+                          middlename: user.middlename || "",
+                        });
+                      }}
+                      className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                )}
+              </div>
 
               {/* Requests Section */}
-              <div>
+              <div className="mt-6">
                 <h4 className="text-xl font-bold text-gray-800 mb-4">
                   Your Requests ({userRequests.length})
                 </h4>
+
                 {userRequests.length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="flex flex-col gap-3">
                     {userRequests.map(request => (
                       <div
                         key={request.transaction}
-                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
+                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition flex flex-col md:flex-row md:justify-between md:items-center gap-3"
                       >
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <p className="font-semibold text-gray-800">{request.purpose}</p>
-                            <p className="text-sm text-gray-600">
-                              Transaction: {request.transaction}
-                            </p>
+                        {/* Left content: purpose & transaction */}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-800 truncate">{request.purpose}</p>
+                          <p className="text-sm text-gray-600 truncate">
+                            Transaction: {request.transaction}
+                          </p>
+                        </div>
+
+                        {/* Right content: dates & status */}
+                        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mt-2 md:mt-0">
+                          <div className="text-sm text-gray-600 text-right md:text-left md:flex-1">
+                            <div>Date: {request.date}</div>
+                            <div>
+                              {request.status === "Pending"
+                                ? "Waiting for admin"
+                                : `Updated: ${request.dateupdated}`}
+                            </div>
                           </div>
+
+                          {/* Status last on row */}
                           <span
-                            className={`px-3 py-1 border-2 rounded-full text-sm font-medium 
+                            className={`px-3 py-1 border-2 rounded-full text-sm font-medium whitespace-nowrap
                               ${statusBorder[request.status]} ${statusText[request.status]}`}
                           >
                             {request.status}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm text-gray-600">
-                          <span>Date: {request.date}</span>
-                          <span>
-                            {request.status === "Pending"
-                              ? "Waiting for admin"
-                              : `Updated: ${request.dateupdated}`}
                           </span>
                         </div>
                       </div>

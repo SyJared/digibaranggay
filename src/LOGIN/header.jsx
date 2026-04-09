@@ -51,7 +51,7 @@ if (!user) return null;
   </div>
 
   {/* Navigation */}
-  <nav className="flex items-center gap-2 md:gap-6 overflow-x-auto whitespace-nowrap">
+  <nav className="flex items-center gap-2 md:gap-6 overflow-x-auto overflow-y-visible whitespace-nowrap ">
     {role === "user" && (
       <>
         <Emergency />

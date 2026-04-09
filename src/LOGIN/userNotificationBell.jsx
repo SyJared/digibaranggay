@@ -147,47 +147,49 @@ export default function UserNotificationBell() {
       </button>
 
       {open && (
-  <div className="
-    fixed left-1/2 -translate-x-1/2 top-16 w-[95vw]
-    md:absolute md:left-auto md:translate-x-0 md:top-full md:right-0 md:w-96 md:mt-3
-    bg-white shadow-xl rounded-xl border z-50
-  ">
+  <div
+    className="
+      fixed left-1/2 -translate-x-1/2 top-16 w-[95vw] 
+      md:absolute md:top-full md:right-0 md:w-96 md:mt-2
+      bg-white shadow-xl rounded-xl border z-50
+    "
+  >
+    {/* Header */}
     <div className="p-4 md:p-5 border-b">
       <h2 className="font-bold text-lg">Notifications</h2>
     </div>
 
+    {/* Notifications List */}
     <div className="max-h-[60vh] md:max-h-[400px] overflow-y-auto divide-y">
-      {notifications.length === 0 && (
-        <div className="p-10 text-center text-gray-400">
-          No notifications yet
-        </div>
-      )}
-
-      {notifications.map((n) => (
-        <div
-          key={n.id}
-          className={`p-3 md:p-4 transition cursor-pointer ${
-            n.user_read === 0
-              ? "bg-teal-50 hover:bg-teal-100"
-              : "bg-white hover:bg-gray-50"
-          }`}
-        >
-          <div className="flex justify-between gap-3">
-            <div className="flex-1 space-y-1">
-              {n.user_read === 0 && (
-                <span className="w-2 h-2 rounded-full bg-teal-500 inline-block mr-2" />
-              )}
-              <p className="text-sm text-gray-800 inline">{n.message}</p>
-              <p className="text-xs text-gray-500 mt-1">
+      {notifications.length === 0 ? (
+        <div className="p-6 text-center text-gray-400">No notifications yet</div>
+      ) : (
+        notifications.map((n) => (
+          <div
+            key={n.id}
+            className={`p-3 md:p-4 transition cursor-pointer flex flex-col sm:flex-row justify-between gap-2 sm:gap-3 ${
+              n.user_read === 0
+                ? "bg-teal-50 hover:bg-teal-100"
+                : "bg-white hover:bg-gray-50"
+            }`}
+          >
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="flex items-center gap-2">
+                {n.user_read === 0 && (
+                  <span className="w-2 h-2 rounded-full bg-teal-500 shrink-0" />
+                )}
+                <p className="text-sm text-gray-800 truncate">{n.message}</p>
+              </div>
+              <p className="text-xs text-gray-500 truncate">
                 Transaction: {n.transaction}
               </p>
             </div>
-            <span className="text-xs text-gray-400 whitespace-nowrap">
+            <span className="text-xs text-gray-400 whitespace-nowrap mt-1 sm:mt-0">
               {getRelativeTime(n.created_at)}
             </span>
           </div>
-        </div>
-      ))}
+        ))
+      )}
     </div>
   </div>
 )}

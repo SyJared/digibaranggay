@@ -57,8 +57,8 @@ function HeaderRequests({ filterUserId }) {
 
       {isOpen && (
   <div className="
-    fixed left-1/2 -translate-x-1/2 top-16 w-[95vw]
-    md:absolute md:left-auto md:translate-x-0 md:top-full md:right-0 md:w-[500px] md:mt-2
+    fixed top-16 left-1/2 -translate-x-1/2 w-[95vw] max-h-[80vh] overflow-y-auto
+    md:w-[500px] md:right-4 md:left-auto md:translate-x-0 md:top-16
     bg-white border border-gray-200 rounded-lg shadow-xl z-50
   ">
     
