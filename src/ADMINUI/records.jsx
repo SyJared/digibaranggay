@@ -1,10 +1,12 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { RequestContext } from "../requestList";
+import { useMemo } from "react";
+
 
 function Records() {
-  const { users, listingMessage } = useContext(RequestContext);
+  const { users, setUsers, listingMessage } = useContext(RequestContext);
   const [downloading, setDownloading] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
+  const [selecteds, setSelecteds] = useState(null);
   const [filterStatus, setFilterStatus] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -19,6 +21,10 @@ function Records() {
       setToast({ show: false, message: "", type: "" });
     }, 3000);
   };
+  
+  useEffect(() => {
+  setSelecteds(null);
+}, [filterStatus, searchQuery]);
 
   const downloadableTransactions = [
   "Brgy. clearance",
@@ -41,26 +47,36 @@ function Records() {
       timeStyle: "short",
     });
 
-  const normalized = users.map((u) => ({
+  const normalized = useMemo(() => {
+  return users.map((u) => ({
     ...u,
+    id: String(u.id),
     status: (u.status || "").trim(),
     name: (u.name || "").trim(),
     email: (u.email || "").trim(),
+    transaction: (u.transaction || "").trim(),
   }));
+}, [users]);
 
-  const filteredUsers = normalized
-    .filter((u) => filterStatus === "All" || u.status === filterStatus)
-    .filter((u) =>
-      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  const filteredUsers = useMemo(() => {
+  const q = searchQuery.toLowerCase().trim();
 
-  const selected = normalized.find(
-  (u) =>
-    u.id === selectedId?.id &&
-    u.transaction === selectedId?.transaction
-);
-  const selectedColor = selected ? statusColors[selected.status] : null;
+  return normalized.filter((u) => {
+    const matchesStatus =
+      filterStatus === "All" || u.status === filterStatus;
+
+    const matchesSearch =
+      (u.name || "").toLowerCase().includes(q) ||
+      (u.email || "").toLowerCase().includes(q) ||
+      (u.transaction || "").toLowerCase().includes(q);
+
+    return matchesStatus && matchesSearch;
+  });
+}, [normalized, filterStatus, searchQuery]);
+
+  
+
+  const selectedColor = selecteds ? statusColors[selecteds.status] : null;
 
   const handleMarkSuccessful = async (id, transaction) => {
   if (!window.confirm("Mark this request as successful?")) return;
@@ -88,7 +104,8 @@ function Records() {
 
       setUsers((prev) =>
         prev.map((u) =>
-          u.id === id && u.transaction === transaction
+          u.id === id &&
+u.transaction.trim().toLowerCase() === transaction.trim().toLowerCase()
             ? {
                 ...u,
                 status: "Successful"
@@ -181,7 +198,7 @@ const handleDownload = async (userId, transaction, purpose) => {
             return (
               <button
                 key={s}
-                onClick={() => { setFilterStatus(s); setSelectedId(null); }}
+                onClick={() => { setFilterStatus(s); setSelecteds(null); }}
                 className={`flex-1 py-2 text-xs font-medium border-b-2 ${
                   active
                     ? "border-emerald-600 text-emerald-700 bg-emerald-50"
@@ -200,13 +217,13 @@ const handleDownload = async (userId, transaction, purpose) => {
           {filteredUsers.map((u) => {
             const color = statusColors[u.status] || statusColors.Pending;
             const active =
-            selectedId?.id === u.id &&
-            selectedId?.transaction === u.transaction;
+            selecteds?.id === u.id &&
+            selecteds?.transaction === u.transaction;
 
             return (
               <button
-                key={u.id}
-                onClick={() => setSelectedId({ id: u.id, transaction: u.transaction })}
+                key={`${u.id}-${u.transaction}`}
+                onClick={() => setSelecteds(u)}
                 className={`w-full text-left flex items-center gap-3 px-4 py-3 border-b border-slate-300 ${
                   active ? "bg-emerald-50 border-l-2 border-l-emerald-600" : ""
                 }`}
@@ -235,7 +252,7 @@ const handleDownload = async (userId, transaction, purpose) => {
       {/* ───────── RIGHT PANEL ───────── */}
       <div className="flex-1 flex flex-col bg-slate-50 h-full min-h-0 overflow-hidden">
 
-        {!selected ? (
+        {!selecteds ? (
           <div className="flex-1 flex items-center justify-center text-slate-400">
             Select a record
           </div>
@@ -245,14 +262,14 @@ const handleDownload = async (userId, transaction, purpose) => {
             <div className="bg-white border-b border-slate-300 px-6 py-4 flex items-center gap-4">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold ${selectedColor.bg} ${selectedColor.text}`}>
                 {/* CHANGED: uses NAME initial */}
-                {selected.name?.trim()?.[0]?.toUpperCase() || "R"}
+                {selecteds.name?.trim()?.[0]?.toUpperCase() || "R"}
               </div>
 
               <div>
-                <div className="font-semibold">{selected.transaction}</div>
-                <div className="text-sm text-slate-500">{selected.name}</div>
+                <div className="font-semibold">{selecteds.transaction}</div>
+                <div className="text-sm text-slate-500">{selecteds.name}</div>
                 <span className={`text-xs px-2 py-0.5 rounded-full ${selectedColor.bg} ${selectedColor.text}`}>
-                  {selected.status}
+                  {selecteds.status}
                 </span>
               </div>
             </div>
@@ -262,38 +279,38 @@ const handleDownload = async (userId, transaction, purpose) => {
 
               <Section title="Request Info">
                 <div className="grid grid-cols-2 gap-3">
-                  <InfoCard label="Date Requested" value={formatDate(selected.date)} />
-                  <InfoCard label="Date Updated" value={formatDate(selected.dateupdated)} />
-                  <InfoCard label="Payment" value={`₱${selected.pay}`} />
-                  <InfoCard label="Pickup" value={selected.pickup} />
+                  <InfoCard label="Date Requested" value={formatDate(selecteds.date)} />
+                  <InfoCard label="Date Updated" value={formatDate(selecteds.dateupdated)} />
+                  <InfoCard label="Payment" value={`₱${selecteds.pay}`} />
+                  <InfoCard label="Pickup" value={selecteds.pickup} />
                 </div>
               </Section>
 
               <Section title="Purpose">
-                <InfoCard label="Reason" value={selected.purpose} />
+                <InfoCard label="Reason" value={selecteds.purpose} />
               </Section>
 
             </div>
 
             {/* Actions */}
-            {selected.status === "Approved" && (
+            {selecteds.status === "Approved" && (
   <div className="bg-white border-t p-4 flex gap-3">
 
     <button 
       onClick={(e) => {
         e.stopPropagation();
-        handleMarkSuccessful(selected.id, selected.transaction);
+        handleMarkSuccessful(selecteds.id, selecteds.transaction);
       }}
       className="flex-1 bg-blue-600 text-white py-2 rounded-lg"
     >
       Mark Successful
     </button>
 
-    {downloadableTransactions.includes(selected.transaction) && (
+    {downloadableTransactions.includes(selecteds.transaction) && (
       <button disabled={downloading}
         onClick={(e) => {
           e.stopPropagation();
-          handleDownload(selected.id, selected.transaction, selected.purpose);
+          handleDownload(selecteds.id, selecteds.transaction, selecteds.purpose);
         }}
         className="flex-1 bg-green-600 text-white py-2 rounded-lg disabled:opacity-50"
       >
