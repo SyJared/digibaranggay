@@ -3,12 +3,29 @@ import { RequestContext } from "../requestList";
 
 function Records() {
   const { users, listingMessage } = useContext(RequestContext);
-
+  const [downloading, setDownloading] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [filterStatus, setFilterStatus] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
   const statuses = ["All", "Approved", "Pending", "Rejected", "Expired", "Successful"];
+
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
+
+  const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+
+    setTimeout(() => {
+      setToast({ show: false, message: "", type: "" });
+    }, 3000);
+  };
+
+  const downloadableTransactions = [
+  "Brgy. clearance",
+  "Barangay ID",
+  "First job seeker",
+  "Working clearance"
+];
 
   const statusColors = {
     Approved: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-300", dot: "bg-emerald-500" },
@@ -67,12 +84,20 @@ function Records() {
     const data = await res.json();
 
     if (data.success) {
-      alert(data.message);
+      showToast(data.message || "Marked as successful", "success");
 
-      // Update UI context state instead of reload (better practice)
-      window.location.reload(); // temporary but acceptable
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === id && u.transaction === transaction
+            ? {
+                ...u,
+                status: "Successful"
+              }
+            : u
+        )
+      );
     } else {
-      alert(data.message);
+      showToast(data.message || "Failed to update", "error");
     }
 
   } catch (err) {
@@ -83,7 +108,9 @@ function Records() {
 
 const handleDownload = async (userId, transaction, purpose) => {
   try {
-    // Create form data
+    setDownloading(true);
+    showToast("Generating document...", "success");
+
     const formData = new FormData();
     formData.append("id", userId);
     formData.append("transaction", transaction);
@@ -91,30 +118,43 @@ const handleDownload = async (userId, transaction, purpose) => {
 
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/generate_doc.php`, {
       method: "POST",
-      body: formData, // send as form-data
-      credentials: "include", // if you need cookies/session
+      body: formData,
+      credentials: "include",
     });
 
     if (!res.ok) throw new Error("Server error");
 
     const blob = await res.blob();
     const url = window.URL.createObjectURL(blob);
+
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${transaction}.docx`; // optional: dynamic file name
+    a.download = `${transaction}.docx`;
     document.body.appendChild(a);
     a.click();
     a.remove();
+
     window.URL.revokeObjectURL(url);
+
+    showToast("Download completed", "success");
 
   } catch (err) {
     console.error(err);
-    alert(err.message);
+    showToast(err.message, "error");
+  } finally {
+    setDownloading(false);
   }
 };
 
   return (
     <div className="flex h-full overflow-hidden">
+      {toast.show && (
+        <div className={`fixed top-5 right-5 px-4 py-3 rounded-lg shadow-lg text-white text-sm z-50
+          ${toast.type === "success" ? "bg-emerald-600" : "bg-red-600"}
+        `}>
+          {toast.message}
+        </div>
+      )}
 
       {/* ───────── LEFT PANEL ───────── */}
       <div className="w-72 min-w-[17rem] flex flex-col border-r border-slate-200 bg-white h-full">
@@ -237,25 +277,32 @@ const handleDownload = async (userId, transaction, purpose) => {
 
             {/* Actions */}
             {selected.status === "Approved" && (
-              <div className="bg-white border-t p-4 flex gap-3">
-                <button 
-                onClick={(e) => {
-                          e.stopPropagation();
-                          handleMarkSuccessful(u.id, u.transaction);
-                        }}
-                className="flex-1 bg-blue-600 text-white py-2 rounded-lg">
-                  Mark Successful
-                </button>
-                <button 
-                onClick={(e) => {
-                          e.stopPropagation();
-                          handleDownload(selected.id, selected.transaction, selected.purpose);
-                        }}
-                 className="flex-1 bg-green-600 text-white py-2 rounded-lg">
-                  Download
-                </button>
-              </div>
-            )}
+  <div className="bg-white border-t p-4 flex gap-3">
+
+    <button 
+      onClick={(e) => {
+        e.stopPropagation();
+        handleMarkSuccessful(selected.id, selected.transaction);
+      }}
+      className="flex-1 bg-blue-600 text-white py-2 rounded-lg"
+    >
+      Mark Successful
+    </button>
+
+    {downloadableTransactions.includes(selected.transaction) && (
+      <button disabled={downloading}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDownload(selected.id, selected.transaction, selected.purpose);
+        }}
+        className="flex-1 bg-green-600 text-white py-2 rounded-lg disabled:opacity-50"
+      >
+        Download
+      </button>
+    )}
+
+  </div>
+)}
           </>
         )}
       </div>
