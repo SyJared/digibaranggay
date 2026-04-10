@@ -1,434 +1,398 @@
-import React, { useContext, useState } from "react";
-import { RegisteredContext } from "../registeredContext";
-import Spinner from "../spinner";
+import { useContext, useEffect, useState } from "react";
+import { RequestContext } from "../requestList";
+import "./adhome.css";
 
-function ManageUsers() {
-  const [selectedUserId, setSelectedUserId] = useState(null);
-  const [filterStatus, setFilterStatus] = useState("Pending");
-  const [searchQuery, setSearchQuery] = useState("");
-  const { registered = [], error, additionalInfo = {}, emergencyInfo = {} } = useContext(RegisteredContext);
+function Requestees() {
+  const { users, setUsers, listingError } = useContext(RequestContext);
 
-  const [userStatuses, setUserStatuses] = useState(
-    registered.reduce((acc, u) => {
-      acc[u.id] = u.status;
-      return acc;
-    }, {})
-  );
+  const [active, setActive] = useState(null);
+  const [filter, setFilter] = useState("");
+  const [statusView, setStatusView] = useState("Pending"); // ✅ NEW
+  const [update, setUpdate] = useState({ pay: "", pickup: "", response: ""});
 
-  const [showModal, setShowModal] = useState(false);
-  const [modalUser, setModalUser] = useState(null);
-  const [modalAction, setModalAction] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [actionFeedback, setActionFeedback] = useState("");
 
-  const [messageModal, setMessageModal] = useState({ show: false, message: "", success: null });
-  const [infoModal, setInfoModal] = useState({ show: false, data: null, name: "" });
-  const [emergencyModal, setEmergencyModal] = useState({ show: false, data: null, name: "" });
+  /* ================= PUSH USER NOTIFICATION ================= */
 
-  const statuses = ["Pending", "Accepted", "Rejected"];
+  const pushUserNotification = async (userId, transaction, status) => {
+    if (status !== "Approved" && status !== "Rejected") return;
 
-  const openModal = (user, action) => {
-    setModalUser(user);
-    setModalAction(action);
-    setShowModal(true);
+    const message =
+      status === "Approved"
+        ? `Your request for ${transaction} has been Approved.`
+        : `Your request for ${transaction} has been Rejected. Please contact the barangay for more details.`;
+
+    await fetch(`${import.meta.env.VITE_API_URL}/api/push_user_notification.php`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: userId,
+        transaction,
+        message,
+        type: "user"
+      })
+    });
   };
 
-  const handleStatusChange = async (id, newStatus) => {
-    try {
-      setUserStatuses((prev) => ({ ...prev, [id]: newStatus }));
-      setShowModal(false);
-      setSelectedUserId(null);
-      setMessageModal({ show: true, message: "Updating status...", success: null });
+  const handleClick = async (id, transaction, status) => {
+    setActionError("");
+    setActionFeedback("");
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/updateStatus.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: newStatus }),
-      });
+    const payload = {
+      id,
+      transaction,
+      status,
+      pickup: update.pickup,
+      pay: update.pay,
+      response: update.response,
+      action: status === "AllowAgain" ? "allow_again" : "update_status", // ✅ NEW
+    };
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/handlestatus.php`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!res.ok) {
+        alert("Server error: " + res.status);
+        return;
+      }
 
       const data = await res.json();
 
-      if (!data.success) {
-        setUserStatuses((prev) => ({ ...prev, [id]: registered.find(u => u.id === id).status }));
-        setMessageModal({ show: true, message: "Failed: " + data.message, success: false });
+      if (data.Success) {
+        setActionFeedback(data.message);
+        setActive(null);
+        await pushUserNotification(selectedUser.id, transaction, status);
+
+        // Update UI instantly
+        if (status === "AllowAgain") {
+          setUsers((prev) =>
+            prev.map((u) =>
+              u.id === id && u.transaction === transaction
+                ? { ...u, allow_request: 1 }
+                : u
+            )
+          );
+        } else {
+          setUsers((prev) =>
+            prev.map((u) =>
+              u.id === id && u.transaction === transaction
+                ? { ...u, status }
+                : u
+            )
+          );
+        }
       } else {
-        setMessageModal({ show: true, message: data.message, success: true });
+        setActionError(data.message);
       }
-    } catch (err) {
-      console.error(err);
-      setMessageModal({ show: true, message: "Error updating status. Please try again.", success: false });
+    } catch (error) {
+      setActionError("Failed to fetch: " + error.message);
     }
   };
 
-  const filteredUsers = registered
-    .filter((r) => userStatuses[r.id] === filterStatus)
-    .filter((r) => {
-      const fullName = `${r.firstname} ${r.middlename} ${r.lastname}`.toLowerCase();
-      return (
-        fullName.includes(searchQuery.toLowerCase()) ||
-        r.email.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    });
+  const toggleActive = (id, transaction) => {
+    setActionError("");
+    setActionFeedback("");
 
-  const selectedUser = registered.find((r) => r.id === selectedUserId) || null;
-  const selectedStatus = selectedUser ? userStatuses[selectedUser.id] : null;
-  const selectedUserInfo = selectedUser ? additionalInfo[Number(selectedUser.id)] : null;
-  const selectedHasInfo = selectedUserInfo && (
-    selectedUserInfo.height || selectedUserInfo.weight ||
-    selectedUserInfo.tin || selectedUserInfo.position || selectedUserInfo.employer
-  );
-  const selectedEmergencyData = selectedUser ? emergencyInfo[Number(selectedUser.id)] : null;
-  const selectedHasEmergency = selectedEmergencyData && (
-    selectedEmergencyData.emergency_name || selectedEmergencyData.emergency_contact
-  );
-
-  const statusColors = {
-    Pending: { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-300", dot: "bg-amber-400", badge: "bg-amber-100 text-amber-700" },
-    Accepted: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-300", dot: "bg-emerald-500", badge: "bg-emerald-100 text-emerald-700" },
-    Rejected: { bg: "bg-red-50", text: "text-red-700", border: "border-red-300", dot: "bg-red-400", badge: "bg-red-100 text-red-700" },
+    if (active?.id === id && active?.transaction === transaction) {
+      setActive(null);
+    } else {
+      setActive({ id, transaction });
+    }
   };
 
-  const getInitials = (r) =>
-    `${r.firstname?.[0] ?? ""}${r.lastname?.[0] ?? ""}`.toUpperCase();
+  const statusColors = {
+  Pending: "bg-yellow-100 border-yellow-400 text-yellow-700",
+  Approved: "bg-green-100 border-green-400 text-green-700",
+  Rejected: "bg-rose-100 border-rose-400 text-rose-700",
+  Successful: "bg-blue-100 border-blue-400 text-blue-700",
+  AllowAgain: "bg-purple-100 border-purple-400 text-purple-700",
+};
+
+  // ✅ UPDATED FILTER LOGIC
+  const filteredUsers = users.filter((user) => {
+    const transactionMatch = !filter || user.transaction === filter;
+
+    if (statusView === "Pending") {
+      return transactionMatch && user.status === "Pending";
+    }
+
+    if (statusView === "Successful") {
+      return (
+        transactionMatch &&
+        (user.status === "Successful" || user.status === "Rejected") &&
+        user.request_again === '0'
+      );
+    }
+
+    return false;
+  });
+
+  const selectedUser = users.find(
+    (u) =>
+      u.id === active?.id && u.transaction === active?.transaction
+  );
 
   return (
-    <div className="flex h-full overflow-hidden">
+    <>
+      {/* ✅ STATUS VIEW FILTER */}
+      <div className="flex mb-2 gap-2 justify-center">
+        {["Pending", "Successful"].map((view) => (
+          <button
+            key={view}
+            onClick={() => {
+              setStatusView(view);
+              setActive(null);
+            }}
+            className={`px-7 py-2 text-sm font-medium transition ${
+              statusView === view
+                ? "bg-teal-600 text-white shadow translate-y-3"
+                : "bg-teal-100 text-teal-700 hover:bg-teal-200"
+            }`}
+          >
+            {view === "Successful" ? "Processed" : view}
+          </button>
+        ))}
+      </div>
 
-      {/* ── Additional Info Modal ── */}
-      {infoModal.show && infoModal.data && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-80 overflow-hidden">
-            <div className="bg-teal-700 p-4">
-              <h2 className="text-white font-semibold text-lg">{infoModal.name}</h2>
-              <p className="text-emerald-100 text-sm">Additional Information</p>
-            </div>
-            <div className="p-5 space-y-3">
-              <InfoRow label="Height" value={infoModal.data.height ? `${infoModal.data.height} cm` : "N/A"} />
-              <InfoRow label="Weight" value={infoModal.data.weight ? `${infoModal.data.weight} kg` : "N/A"} />
-              <InfoRow label="TIN" value={infoModal.data.tin || "N/A"} />
-              <InfoRow label="Position" value={infoModal.data.position || "N/A"} />
-              <InfoRow label="Employer" value={infoModal.data.employer || "N/A"} />
-            </div>
-            <div className="px-5 pb-5">
-              <button
-                onClick={() => setInfoModal({ show: false, data: null, name: "" })}
-                className="w-full py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Emergency Modal ── */}
-      {emergencyModal.show && emergencyModal.data && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-80 overflow-hidden">
-            <div className="bg-red-600 p-4">
-              <h2 className="text-white font-semibold text-lg">{emergencyModal.name}</h2>
-              <p className="text-red-100 text-sm">Emergency Contact</p>
-            </div>
-            <div className="p-5 space-y-3">
-              <InfoRow label="Name" value={emergencyModal.data.emergency_name || "N/A"} />
-              <InfoRow label="Address" value={emergencyModal.data.emergency_address || "N/A"} />
-              <InfoRow label="Relation" value={emergencyModal.data.emergency_relation || "N/A"} />
-              <InfoRow label="Contact" value={emergencyModal.data.emergency_contact || "N/A"} />
-            </div>
-            <div className="px-5 pb-5">
-              <button
-                onClick={() => setEmergencyModal({ show: false, data: null, name: "" })}
-                className="w-full py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Message / Loading Modal ── */}
-      {messageModal.show && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-80 overflow-hidden">
-            <div className={`p-4 ${messageModal.success === null ? "bg-emerald-600" : messageModal.success ? "bg-emerald-600" : "bg-red-600"}`}>
-              <h2 className="text-white font-semibold text-lg">
-                {messageModal.success === null ? "Please wait..." : messageModal.success ? "Success" : "Failed"}
-              </h2>
-            </div>
-            <div className="p-6 flex flex-col items-center gap-4">
-              {messageModal.success === null ? (
-                <Spinner />
-              ) : messageModal.success ? (
-                <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <svg className="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-              ) : (
-                <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
-                  <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-              )}
-              <p className="text-slate-700 text-center">{messageModal.message}</p>
-              {messageModal.success !== null && (
-                <button
-                  onClick={() => setMessageModal({ show: false, message: "", success: null })}
-                  className="w-full py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition"
-                >
-                  Close
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Confirmation Modal ── */}
-      {showModal && modalUser && (
-        <div className="fixed inset-0 bg-white/10 backdrop-blur-xl bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-96 shadow-xl text-center">
-            <h2 className="text-xl font-semibold mb-4">
-              Are you sure you want to {modalAction.toLowerCase()} this account?
-            </h2>
-            <p className="text-gray-700 mb-6">
-              {modalUser.firstname} {modalUser.middlename} {modalUser.lastname}
-            </p>
-            <div className="flex gap-4 justify-center">
-              <button
-                onClick={() => handleStatusChange(modalUser.id, modalAction)}
-                className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 transition"
-              >
-                Yes
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400 transition"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════
-          LEFT PANEL — list
-      ══════════════════════════════════════════ */}
-      <div className="w-72 min-w-[17rem] flex flex-col border-r border-slate-200 bg-white overflow-hidden">
-
-        {/* Search */}
-        <div className="p-3 border-b border-slate-200">
-          <input
-            type="text"
-            placeholder="Search name or email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-        </div>
-
-        {/* Status tabs with counts */}
-        <div className="flex border-b border-slate-200">
-          {statuses.map((s) => {
-            const count = registered.filter((r) => userStatuses[r.id] === s).length;
-            const colors = statusColors[s];
-            const isActive = filterStatus === s;
-            return (
-              <button
-                key={s}
-                onClick={() => { setFilterStatus(s); setSelectedUserId(null); }}
-                className={`flex-1 flex flex-col items-center py-2.5 text-xs font-medium border-b-2 transition
-                  ${isActive
-                    ? `${colors.text} border-current ${colors.bg}`
-                    : "text-slate-500 border-transparent hover:bg-slate-50"
-                  }`}
-              >
-                <span className={`text-base font-semibold ${isActive ? colors.text : "text-slate-700"}`}>
-                  {count}
-                </span>
-                {s}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Error */}
-        {error && (
-          <p className="mx-3 mt-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-xs">
-            {error}
-          </p>
+      {/* Transaction Filters */}
+      <div className="filters">
+        {[
+          "KKID Card",
+          "Barangay ID",
+          "Brgy. clearance",
+          "Certificate of indigency",
+          "OSCA",
+          "First job seeker",
+          "Working clearance",
+          "Barangay inhabitants",
+        ].map((item) => (
+          <button
+            key={item}
+            className={`px-4 py-2 rounded-full text-[12px] font-medium transition-all duration-200 ${
+              filter === item
+                ? "bg-teal-600 text-white shadow-md"
+                : "bg-teal-100 text-teal-800 hover:bg-teal-200"
+            }`}
+            onClick={() => setFilter(item)}
+          >
+            {item}
+          </button>
+        ))}
+        {filter && (
+          <button
+            className="px-4 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 text-[12px] font-medium transition"
+            onClick={() => setFilter("")}
+          >
+            Show All
+          </button>
         )}
+      </div>
 
-        {/* User list */}
-        <div className="flex-1 overflow-y-auto">
+      <div className="requestees-container gap-4">
+        {/* LEFT SIDE */}
+        <div className="requestees no-scrollbar">
+          {listingError && (
+            <p className="text-rose-600">{listingError}</p>
+          )}
+
           {filteredUsers.length === 0 ? (
-            <p className="text-center text-slate-400 text-sm mt-10">No users found.</p>
+            <p className="flex mx-auto my-auto text-gray-500 text-center">
+              No requests found
+            </p>
           ) : (
-            filteredUsers.map((r) => {
-              const st = userStatuses[r.id];
-              const colors = statusColors[st];
-              const isSelected = selectedUserId === r.id;
+            filteredUsers.map((user) => {
+              const isActive =
+                active?.id === user.id &&
+                active?.transaction === user.transaction;
+
               return (
-                <button
-                  key={r.id}
-                  onClick={() => setSelectedUserId(r.id)}
-                  className={`w-full text-left flex items-center gap-3 px-4 py-3 border-b border-slate-100 transition
-                    ${isSelected
-                      ? "bg-emerald-50 border-l-2 border-l-emerald-600"
-                      : "hover:bg-slate-50 border-l-2 border-l-transparent"
-                    }`}
+                <div
+                  key={user.id + user.transaction}
+                  className={`users flex justify-between items-center p-4 rounded-xl border transition-all duration-300 cursor-pointer ${
+                    isActive
+                      ? "bg-green-50 shadow-md translate-x-2"
+                      : "bg-white hover:bg-green-50"
+                  }`}
+                  onClick={() =>
+                    toggleActive(user.id, user.transaction)
+                  }
                 >
-                  {/* Avatar */}
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 ${colors.bg} ${colors.text}`}>
-                    {getInitials(r)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-slate-900 truncate">
-                      {r.firstname} {r.lastname}
+                  <div>
+                    <div className="font-semibold text-black">
+                      {user.transaction}
                     </div>
-                    <div className="text-xs text-slate-500 truncate">{r.email}</div>
+                    <div className="text-gray-600">
+                      {user.name}
+                    </div>
                   </div>
-                  {/* Status dot */}
-                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${colors.dot}`} />
-                </button>
+                  <div className="text-gray-500">
+                    {user.date}
+                  </div>
+                </div>
               );
             })
           )}
         </div>
-      </div>
 
-      {/* ══════════════════════════════════════════
-          RIGHT PANEL — detail
-      ══════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-slate-50">
-        {!selectedUser ? (
-          /* Empty state */
-          <div className="flex-1 flex flex-col items-center justify-center gap-3 text-slate-400">
-            <svg className="w-12 h-12 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-            </svg>
-            <span className="text-sm">Select a user to view details</span>
-          </div>
-        ) : (
-          <>
-            {/* Detail header */}
-            <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center gap-4 flex-shrink-0">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-base font-semibold flex-shrink-0 ${statusColors[selectedStatus].bg} ${statusColors[selectedStatus].text}`}>
-                {getInitials(selectedUser)}
+        <div className="approvereject p-6 rounded-xl bg-white shadow-md w-full max-w-lg">
+          {selectedUser ? (
+            <div className="flex flex-col gap-4">
+
+              <h2 className="text-xl md:text-xl font-semibold border-b pb-2 flex justify-between">
+                {selectedUser.transaction}
+                <div
+                className={`inline-block px-4 py-1 rounded-full text-sm font-medium border w-fit ${
+                  statusColors[selectedUser.status] || "bg-gray-100 border-gray-400 text-gray-700"
+                }`}
+              >
+                {selectedUser.status}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-slate-900 text-base">
-                  {selectedUser.firstname} {selectedUser.middlename} {selectedUser.lastname}
-                </div>
-                <div className="text-sm text-slate-500">{selectedUser.email}</div>
-                <span className={`inline-block mt-1 text-xs px-2.5 py-0.5 rounded-full font-medium ${statusColors[selectedStatus].badge}`}>
-                  {selectedStatus}
-                </span>
-              </div>
-              {/* Additional info & Emergency badges */}
-              <div className="flex gap-2 flex-shrink-0">
-                {selectedHasInfo && (
+              </h2>
+
+              {/* ================= PENDING VIEW ================= */}
+              {statusView === "Pending" && (
+                <>
+                  {/* USER DETAILS */}
+                  <div className="flex flex-col text-gray-700 space-y-1">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Name:</span>
+                      <span>{selectedUser.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Date Requested:</span>
+                      <span>{selectedUser.date}</span>
+                    </div>
+                  </div>
+
+                  {/* PURPOSE */}
+                  <div>
+                    <label className="block font-medium text-gray-700 mb-1">
+                      Purpose of Request
+                    </label>
+                    <p className="bg-teal-50 p-3 rounded-md border text-teal-800">
+                      {selectedUser.purpose}
+                    </p>
+                  </div>
+
+                  {/* RESPONSE */}
+                  <div>
+                    <label className="block font-medium text-gray-700 mb-1">
+                      Admin Response
+                    </label>
+                    <textarea
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      rows="3"
+                      placeholder="Write response to user..."
+                      value={update.response}
+                      onChange={(e) =>
+                        setUpdate((u) => ({ ...u, response: e.target.value }))
+                      }
+                    />
+                  </div>
+
+                  {/* PAYMENT & PICKUP */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-medium text-gray-700 mb-1">
+                        Payment Amount
+                      </label>
+                      <p className="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-800">
+                        ₱{selectedUser.pay ?? 0}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block font-medium text-gray-700 mb-1">
+                        Pick-up Date
+                      </label>
+                      <input
+                        type="date"
+                        className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        onChange={(e) =>
+                          setUpdate((u) => ({ ...u, pickup: e.target.value }))
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* APPROVE / REJECT */}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      className="flex-1 bg-teal-700 hover:bg-teal-600 text-white font-semibold py-2 rounded-lg transition active:scale-95"
+                      onClick={() =>
+                        handleClick(
+                          selectedUser.id,
+                          selectedUser.transaction,
+                          "Approved"
+                        )
+                      }
+                    >
+                      Approve
+                    </button>
+
+                    <button
+                      className="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-semibold py-2 rounded-lg transition active:scale-95"
+                      onClick={() =>
+                        handleClick(
+                          selectedUser.id,
+                          selectedUser.transaction,
+                          "Rejected"
+                        )
+                      }
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {/* ================= PROCESSED VIEW ================= */}
+              {statusView === "Successful" && (
+                <>
+                  <p>{selectedUser.name}</p>
                   <button
-                    onClick={() => setInfoModal({
-                      show: true,
-                      data: selectedUserInfo,
-                      name: `${selectedUser.firstname} ${selectedUser.middlename} ${selectedUser.lastname}`
-                    })}
-                    className="text-xs px-3 py-1.5 bg-teal-500 text-white rounded-full hover:bg-teal-600 transition font-medium"
+                    className="w-full mt-3 primary-color hover:bg-amber-500 text-white font-semibold py-2 rounded-lg transition active:scale-95"
+                    onClick={() =>
+                      handleClick(
+                        selectedUser.id,
+                        selectedUser.transaction,
+                        "AllowAgain"
+                      )
+                    }
                   >
-                    Additional info
+                    Allow User To Request Again
                   </button>
-                )}
-                {selectedHasEmergency && (
-                  <button
-                    onClick={() => setEmergencyModal({
-                      show: true,
-                      data: selectedEmergencyData,
-                      name: `${selectedUser.firstname} ${selectedUser.middlename} ${selectedUser.lastname}`
-                    })}
-                    className="text-xs px-3 py-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition font-medium"
-                  >
-                    Emergency
-                  </button>
-                )}
-              </div>
+                </>
+              )}
+
+              {actionError && (
+                <p className="text-rose-600 text-sm font-medium">
+                  {actionError}
+                </p>
+              )}
+              {actionFeedback && (
+                <p className="text-teal-700 text-sm font-medium">
+                  {actionFeedback}
+                </p>
+              )}
             </div>
-
-            {/* Detail body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-5">
-
-              <Section title="Personal information">
-                <div className="grid grid-cols-2 gap-3">
-                  <InfoCard label="Civil status" value={selectedUser.civilstatus} />
-                  <InfoCard label="Role" value={selectedUser.role} />
-                  <InfoCard label="Contact number" value={selectedUser.contactnumber} />
-                  <InfoCard label="Household number" value={selectedUser.housenumber} />
-                </div>
-              </Section>
-
-              <Section title="Address">
-                <div className="grid grid-cols-2 gap-3">
-                  <InfoCard label="Sitio" value={selectedUser.sitio} />
-                  <InfoCard label="Street" value={selectedUser.street} />
-                </div>
-                <p className="text-xs text-slate-400 mt-1">Brgy. Binan Pagsanajan, Laguna</p>
-              </Section>
-
-              <Section title="Registration">
-                <div className="grid grid-cols-2 gap-3">
-                  <InfoCard label="Date registered" value={selectedUser.dateregistered} />
-                  <InfoCard label="Status" value={selectedStatus} />
-                </div>
-              </Section>
+          ) : (
+            <div className="text-gray-400 text-xl md:text-2xl text-center">
+              Select a user
             </div>
-
-            {/* Action footer — only for Pending */}
-            {selectedStatus === "Pending" && (
-              <div className="bg-white border-t border-slate-200 px-6 py-4 flex gap-3 flex-shrink-0">
-                <button
-                  onClick={() => openModal(selectedUser, "Accepted")}
-                  className="flex-1 font-medium text-white py-2.5 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 transition"
-                >
-                  Accept
-                </button>
-                <button
-                  onClick={() => openModal(selectedUser, "Rejected")}
-                  className="flex-1 font-medium text-white py-2.5 px-4 rounded-lg bg-red-600 hover:bg-red-700 transition"
-                >
-                  Reject
-                </button>
-              </div>
-            )}
-          </>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
-/* ── Small helpers ── */
-
-const Section = ({ title, children }) => (
-  <div>
-    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">{title}</p>
-    {children}
-  </div>
-);
-
-const InfoCard = ({ label, value }) => (
-  <div className="bg-white rounded-lg border border-slate-200 px-4 py-3">
-    <p className="text-xs text-slate-400 mb-0.5">{label}</p>
-    <p className="text-sm font-medium text-slate-900">{value || "—"}</p>
-  </div>
-);
-
-const InfoRow = ({ label, value }) => (
-  <div className="flex justify-between items-start gap-4 pb-3 border-b border-emerald-200">
-    <span className="font-medium text-emerald-600 text-sm whitespace-nowrap">{label} :</span>
-    <span className="text-slate-900 text-right flex-1">{value}</span>
-  </div>
-);
-
-export default ManageUsers;
+export default Requestees;
