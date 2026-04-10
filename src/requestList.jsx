@@ -16,8 +16,21 @@ export function RequestProvider({ children }) {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/requestees.php`);
       const result = await res.json();
       if (result.success) {
-        setUsers(result.data);
-      } else {
+      const cleaned = (result.data || []).map((u) => ({
+        ...u,
+        
+        name: u.name?.trim() || "-",
+        
+        status: u.status?.trim() || "-",
+        transaction: u.transaction?.trim() || "-",
+
+        created_at: u.created_at ?? "-",
+        date: u.date ?? "-",
+        dateupdated: u.dateupdated ?? "-",
+      }));
+
+      setUsers(cleaned);
+    } else {
         setListingError(result.message);
       }
     } catch (err) {

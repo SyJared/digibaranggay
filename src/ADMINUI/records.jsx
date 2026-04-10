@@ -41,11 +41,22 @@ function Records() {
     Successful: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-300", dot: "bg-emerald-500" },
   };
 
-  const formatDate = (time) =>
-    new Date(time).toLocaleString("en-PH", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
+  const formatDate = (time) => {
+  if (!time || time === "-" || time === "0000-00-00 00:00:00") {
+    return "-";
+  }
+
+  const date = new Date(time);
+
+  if (isNaN(date.getTime())) {
+    return "-";
+  }
+
+  return date.toLocaleString("en-PH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+};
 
   const normalized = useMemo(() => {
   return users.map((u) => ({
@@ -279,8 +290,8 @@ const handleDownload = async (userId, transaction, purpose) => {
 
               <Section title="Request Info">
                 <div className="grid grid-cols-2 gap-3">
-                  <InfoCard label="Date Requested" value={formatDate(selecteds.date)} />
-                  <InfoCard label="Date Updated" value={formatDate(selecteds.dateupdated)} />
+                  <InfoCard label="Date Requested" value={formatDate(selecteds.created_at)} />
+                  <InfoCard label="Date updated" value={formatDate(selecteds.dateupdated)} />
                   <InfoCard label="Payment" value={`₱${selecteds.pay}`} />
                   <InfoCard label="Pickup" value={selecteds.pickup} />
                 </div>
