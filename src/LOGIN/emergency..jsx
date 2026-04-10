@@ -8,10 +8,9 @@ export default function Emergency() {
     emergency_name: "",
     emergency_contact: "",
     emergency_relationship: "",
-    emergency_address: ""
+    emergency_address: "",
   });
 
-  // Fetch emergency info on mount
   useEffect(() => {
     async function fetchEmergency() {
       try {
@@ -25,7 +24,7 @@ export default function Emergency() {
             emergency_name: data.emergency.emergency_name || "",
             emergency_contact: data.emergency.emergency_contact || "",
             emergency_relationship: data.emergency.emergency_relation || "",
-            emergency_address: data.emergency.emergency_address || ""
+            emergency_address: data.emergency.emergency_address || "",
           });
         }
       } catch (err) {
@@ -35,7 +34,8 @@ export default function Emergency() {
     if (open) fetchEmergency();
   }, [open]);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,7 +48,7 @@ export default function Emergency() {
           emergency_name: form.emergency_name,
           emergency_address: form.emergency_address,
           emergency_contact: form.emergency_contact,
-          emergency_relation: form.emergency_relationship
+          emergency_relation: form.emergency_relationship,
         }),
       });
       const data = await res.json();
@@ -79,86 +79,109 @@ export default function Emergency() {
 
       {/* MODAL */}
       {open && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white w-full max-w-md md:max-w-lg rounded-xl shadow-xl p-6 relative flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 px-3">
+          <div className="bg-white w-full max-w-md sm:max-w-lg md:max-w-xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
 
-            {/* CLOSE BUTTON */}
-            <button
-              onClick={() => setOpen(false)}
-              className="absolute top-2 right-3 text-gray-500 hover:text-black text-lg"
-            >
-              ✕
-            </button>
-
-            <h2 className="text-xl font-semibold mb-4">Emergency Contact</h2>
-
-            {/* SCROLLABLE FORM */}
-            <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2">
-
-              <div>
-                <label className="text-sm">Full Name</label>
-                <input
-                  type="text"
-                  name="emergency_name"
-                  value={form.emergency_name}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded"
-                  placeholder="Enter name"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="text-sm">Contact Number</label>
-                <input
-                  type="text"
-                  name="emergency_contact"
-                  value={form.emergency_contact}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded"
-                  placeholder="Enter contact number"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="text-sm">Relationship</label>
-                <input
-                  type="text"
-                  name="emergency_relationship"
-                  value={form.emergency_relationship}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded"
-                  placeholder="e.g. Mother, Friend"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="text-sm">Address</label>
-                <input
-                  type="text"
-                  name="emergency_address"
-                  value={form.emergency_address}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded"
-                  placeholder="Street, Sitio..."
-                  required
-                />
-              </div>
-
+            {/* HEADER */}
+            <div className="flex items-center justify-between px-5 py-4 border-b">
+              <h2 className="text-lg sm:text-xl font-semibold">
+                Emergency Contact
+              </h2>
               <button
-                type="submit"
-                className="mt-3 primary-color text-white py-2 rounded hover:opacity-90"
+                onClick={() => setOpen(false)}
+                className="text-gray-500 hover:text-black text-xl"
               >
-                Save
+                ✕
               </button>
+            </div>
+
+            {/* FORM */}
+            <form
+              onSubmit={handleSubmit}
+              className="flex-1 overflow-y-auto px-5 py-4 space-y-4"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="text-sm font-medium">Full Name</label>
+                  <input
+                    type="text"
+                    name="emergency_name"
+                    value={form.emergency_name}
+                    onChange={handleChange}
+                    className="w-full border rounded-lg px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="Juan Dela Cruz"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Contact Number</label>
+                  <input
+                    type="text"
+                    name="emergency_contact"
+                    value={form.emergency_contact}
+                    onChange={handleChange}
+                    className="w-full border rounded-lg px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="09XXXXXXXXX"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Relationship</label>
+                  <input
+                    type="text"
+                    name="emergency_relationship"
+                    value={form.emergency_relationship}
+                    onChange={handleChange}
+                    className="w-full border rounded-lg px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="Mother"
+                    required
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="text-sm font-medium">Address</label>
+                  <input
+                    type="text"
+                    name="emergency_address"
+                    value={form.emergency_address}
+                    onChange={handleChange}
+                    className="w-full border rounded-lg px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="Street, Barangay, City"
+                    required
+                  />
+                </div>
+              </div>
 
               {message && (
-                <p className={`text-sm mt-2 ${message.includes("successfully") ? "text-green-600" : "text-red-600"}`}>
+                <p
+                  className={`text-sm ${
+                    message.includes("successfully")
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
                   {message}
                 </p>
               )}
+
+              {/* ACTIONS */}
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="px-4 py-2 rounded-lg border hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  Save
+                </button>
+              </div>
             </form>
           </div>
         </div>

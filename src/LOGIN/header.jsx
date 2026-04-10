@@ -51,42 +51,41 @@ if (!user) return null;
   </div>
 
   {/* Navigation */}
-  <nav className="flex items-center gap-2 md:gap-6 overflow-x-auto overflow-y-visible whitespace-nowrap ">
-    {role === "user" && (
-      <>
-        <Emergency />
-        <AdditionalInfo />
-        <Profile />
-        <UserNotificationBell />
-        <HeaderRequests filterUserId={user.id} />
-        <button
-          className="flex items-center gap-1 md:gap-2 text-gray-700 hover:text-red-600 transition font-medium shrink-0"
-          onClick={handleLogout}
-        >
-          <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-          <span className="hidden sm:inline text-sm md:text-base">Logout</span>
-        </button>
-      </>
-    )}
+  <nav className="flex items-center gap-2 md:gap-4 shrink-0">
+  {role === "user" && (
+    <>
+      <Emergency />
+      <AdditionalInfo />
+      <Profile />
+      <UserNotificationBell />
+      <HeaderRequests filterUserId={user.id} />
+      <button
+        className="flex items-center gap-1 md:gap-2 text-gray-700 hover:text-red-600 transition font-medium shrink-0"
+        onClick={handleLogout}
+      >
+        <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+        <span className="hidden sm:inline text-sm md:text-base">Logout</span>
+      </button>
+    </>
+  )}
 
-    {role === "admin" && (
-      <>
-        <NotificationBell />
-        <HeaderRequests />
-        <button
-          className="flex items-center gap-1 md:gap-2 text-gray-700 hover:text-red-600 transition font-medium shrink-0"
-          onClick={handleLogout}
-        >
-          <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-          <span className="hidden sm:inline text-sm md:text-base">Logout</span>
-        </button>
-        <div className="w-px h-6 primary-color hidden md:block"></div>
-        <span className="primary-color bg-clip-text text-transparent text-xs md:text-sm font-semibold hidden md:block whitespace-nowrap">
-          Admin Panel
-        </span>
-      </>
-    )}
-  </nav>
+  {role === "admin" && (
+    <>
+      <NotificationBell />
+      <HeaderRequests />
+      <button
+        className="flex items-center gap-1 md:gap-2 text-gray-700 hover:text-red-600 transition font-medium shrink-0"
+        onClick={handleLogout}
+      >
+        <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+        <span className="hidden sm:inline text-sm md:text-base">Logout</span>
+      </button>
+      <span className="primary-color bg-clip-text text-transparent text-xs md:text-sm font-semibold hidden md:block whitespace-nowrap">
+        Admin Panel
+      </span>
+    </>
+  )}
+</nav>
 </header>
 );
 }
