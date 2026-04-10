@@ -1,5 +1,7 @@
 @import "tailwindcss";
-
+html, body, #root {
+  height: 100%;
+}
 .primary-color{
   @apply bg-gradient-to-r from-emerald-800 to-teal-800;
 }

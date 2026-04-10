@@ -38,7 +38,11 @@ function Records() {
       u.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-  const selected = normalized.find((u) => u.id === selectedId);
+  const selected = normalized.find(
+  (u) =>
+    u.id === selectedId?.id &&
+    u.transaction === selectedId?.transaction
+);
   const selectedColor = selected ? statusColors[selected.status] : null;
 
   return (
@@ -53,12 +57,12 @@ function Records() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search name or email..."
-            className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
+            className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 border-slate-300"
           />
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b">
+        <div className="flex border-b border-slate-300">
           {statuses.map((s) => {
             const count = normalized.filter((u) =>
               s === "All" ? true : u.status === s
@@ -84,16 +88,18 @@ function Records() {
         </div>
 
         {/* List (ONLY SCROLLING AREA) */}
-        <div className="flex-1 overflow-y-auto">
+       <div className="flex-1 min-h-0 overflow-y-auto">
           {filteredUsers.map((u) => {
             const color = statusColors[u.status] || statusColors.Pending;
-            const active = selectedId === u.id;
+            const active =
+            selectedId?.id === u.id &&
+            selectedId?.transaction === u.transaction;
 
             return (
               <button
                 key={u.id}
-                onClick={() => setSelectedId(u.id)}
-                className={`w-full text-left flex items-center gap-3 px-4 py-3 border-b ${
+                onClick={() => setSelectedId({ id: u.id, transaction: u.transaction })}
+                className={`w-full text-left flex items-center gap-3 px-4 py-3 border-b border-slate-300 ${
                   active ? "bg-emerald-50 border-l-2 border-l-emerald-600" : ""
                 }`}
               >
@@ -119,7 +125,7 @@ function Records() {
       </div>
 
       {/* ───────── RIGHT PANEL ───────── */}
-      <div className="flex-1 flex flex-col bg-slate-50 h-full overflow-hidden">
+      <div className="flex-1 flex flex-col bg-slate-50 h-full min-h-0 overflow-hidden">
 
         {!selected ? (
           <div className="flex-1 flex items-center justify-center text-slate-400">
@@ -128,7 +134,7 @@ function Records() {
         ) : (
           <>
             {/* Header (fixed, no scroll) */}
-            <div className="bg-white border-b px-6 py-4 flex items-center gap-4">
+            <div className="bg-white border-b border-slate-300 px-6 py-4 flex items-center gap-4">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold ${selectedColor.bg} ${selectedColor.text}`}>
                 {/* CHANGED: uses NAME initial */}
                 {selected.name?.trim()?.[0]?.toUpperCase() || "R"}
@@ -144,7 +150,7 @@ function Records() {
             </div>
 
             {/* Body (NO SCROLL) */}
-            <div className="p-6 space-y-5">
+            <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-5">
 
               <Section title="Request Info">
                 <div className="grid grid-cols-2 gap-3">
@@ -188,7 +194,7 @@ const Section = ({ title, children }) => (
 );
 
 const InfoCard = ({ label, value }) => (
-  <div className="bg-white border rounded-lg p-3">
+  <div className="bg-white border rounded-lg p-3 border-slate-300">
     <p className="text-xs text-slate-400">{label}</p>
     <p className="text-sm font-medium text-slate-900">{value || "—"}</p>
   </div>

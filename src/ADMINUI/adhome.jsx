@@ -132,12 +132,12 @@ function Adhome() {
       )}
 
       {/* CONTENT */}
-      <div className="bg-gray-50 border-e-3 border-l-3 shadow-md border-teal-800 rounded-xl overflow-scroll no-scrollbar mx-20 max-h-[600px]">
-        {active === "Manage Users" && <Manageusers />}
-        {active === "Requests" && <Requestees />}
-        {active === "Records" && <Records />}
-        {active === "Make announcement" && <Announcement />}
-      </div>
+      <div className="bg-gray-50 border-e-3 border-l-3 shadow-md border-teal-800 rounded-xl overflow-hidden mx-20 h-[85vh]">
+  {active === "Manage Users" && <Manageusers />}
+  {active === "Requests" && <Requestees />}
+  {active === "Records" && <Records />}
+  {active === "Make announcement" && <Announcement />}
+</div>
     </div>
   );
 }

@@ -91,7 +91,7 @@ function ManageUsers() {
     `${r.firstname?.[0] ?? ""}${r.lastname?.[0] ?? ""}`.toUpperCase();
 
   return (
-    <div className="flex h-full overflow-hidden"> {/* Parent container still prevents overall scrolling */}
+    <div className="flex h-full min-h-0 overflow-hidden"> {/* Parent container still prevents overall scrolling */}
 
       {/* ── All Modals (kept as is) ── */}
       {/* Additional Info Modal */}
@@ -217,7 +217,7 @@ function ManageUsers() {
       {/* ══════════════════════════════════════════
           LEFT PANEL — list
       ══════════════════════════════════════════ */}
-      <div className="w-72 min-w-[17rem] flex flex-col border-r border-slate-200 bg-white"> {/* Removed overflow-hidden from this div */}
+      <div className="w-72 min-w-[17rem] flex flex-col border-r border-slate-200 bg-white h-full min-h-0 overflow-hidden"> {/* Removed overflow-hidden from this div */}
         {/* Search */}
         <div className="p-3 border-b border-slate-200">
           <input
@@ -262,7 +262,7 @@ function ManageUsers() {
         )}
 
         {/* User list - THIS IS THE SCROLLABLE PART */}
-        <div className="flex-1 overflow-y-auto"> {/* Keep this overflow-y-auto */}
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">{/* Keep this overflow-y-auto */}
           {filteredUsers.length === 0 ? (
             <p className="text-center text-slate-400 text-sm mt-10">No users found.</p>
           ) : (
@@ -304,7 +304,7 @@ function ManageUsers() {
       ══════════════════════════════════════════ */}
       {/* The main container for the right panel should NOT scroll.
           Its content area (specifically the `detail body`) should scroll instead if necessary. */}
-      <div className="flex-1 flex flex-col bg-slate-50"> {/* Removed overflow-hidden from here */}
+      <div className="flex-1 flex flex-col bg-slate-50 min-h-0"> {/* Removed overflow-hidden from here */}
         {!selectedUser ? (
           /* Empty state */
           <div className="flex-1 flex flex-col items-center justify-center gap-3 text-slate-400">
@@ -360,7 +360,7 @@ function ManageUsers() {
             </div>
 
             {/* Detail body - THIS IS THE SCROLLABLE PART ON THE RIGHT */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-5"> {/* Added overflow-y-auto here */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-5">{/* Added overflow-y-auto here */}
               <Section title="Personal information">
                 <div className="grid grid-cols-2 gap-3">
                   <InfoCard label="Civil status" value={selectedUser.civilstatus} />
@@ -388,7 +388,7 @@ function ManageUsers() {
 
             {/* Action footer — only for Pending */}
             {selectedStatus === "Pending" && (
-              <div className="bg-white border-t border-slate-200 px-6 py-4 flex gap-3 flex-shrink-0">
+              <div className="bg-white border-t border-slate-200 px-6 py-4 flex gap-3 shrink-0">
                 <button
                   onClick={() => openModal(selectedUser, "Accepted")}
                   className="flex-1 font-medium text-white py-2.5 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 transition"
