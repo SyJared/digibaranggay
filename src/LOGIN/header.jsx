@@ -90,12 +90,18 @@ function Header() {
 
                   {/* Emergency + Additional Info */}
                   <div className="px-3 py-2 border-b border-gray-100 flex flex-col gap-1">
-                    <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1 px-1">
-                      Quick Actions
-                    </p>
+                  <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1 px-1">
+                    Quick Actions
+                  </p>
+                  <div className="flex items-center gap-2">
                     <Emergency />
-                    <AdditionalInfo />
+                    <span className="text-sm text-gray-700 font-medium">Emergency Information</span>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <AdditionalInfo />
+                    <span className="text-sm text-gray-700 font-medium">Additional Information</span>
+                  </div>
+                </div>
 
                   {/* Logout */}
                   <div className="px-3 py-2">
