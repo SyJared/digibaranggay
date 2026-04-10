@@ -45,6 +45,74 @@ function Records() {
 );
   const selectedColor = selected ? statusColors[selected.status] : null;
 
+  const handleMarkSuccessful = async (id, transaction) => {
+  if (!window.confirm("Mark this request as successful?")) return;
+
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/mark_successful.php`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          id,
+          transaction
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert(data.message);
+
+      // Update UI context state instead of reload (better practice)
+      window.location.reload(); // temporary but acceptable
+    } else {
+      alert(data.message);
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
+};
+
+const handleDownload = async (userId, transaction, purpose) => {
+  try {
+    // Create form data
+    const formData = new FormData();
+    formData.append("id", userId);
+    formData.append("transaction", transaction);
+    formData.append("purpose", purpose);
+
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/generate_doc.php`, {
+      method: "POST",
+      body: formData, // send as form-data
+      credentials: "include", // if you need cookies/session
+    });
+
+    if (!res.ok) throw new Error("Server error");
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${transaction}.docx`; // optional: dynamic file name
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error(err);
+    alert(err.message);
+  }
+};
+
   return (
     <div className="flex h-full overflow-hidden">
 
@@ -170,10 +238,20 @@ function Records() {
             {/* Actions */}
             {selected.status === "Approved" && (
               <div className="bg-white border-t p-4 flex gap-3">
-                <button className="flex-1 bg-blue-600 text-white py-2 rounded-lg">
+                <button 
+                onClick={(e) => {
+                          e.stopPropagation();
+                          handleMarkSuccessful(u.id, u.transaction);
+                        }}
+                className="flex-1 bg-blue-600 text-white py-2 rounded-lg">
                   Mark Successful
                 </button>
-                <button className="flex-1 bg-green-600 text-white py-2 rounded-lg">
+                <button 
+                onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownload(selected.id, selected.transaction, selected.purpose);
+                        }}
+                 className="flex-1 bg-green-600 text-white py-2 rounded-lg">
                   Download
                 </button>
               </div>
