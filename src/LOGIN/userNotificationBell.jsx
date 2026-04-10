@@ -165,7 +165,7 @@ export default function UserNotificationBell() {
         notifications.map((n) => (
           <div
             key={n.id}
-            className={`p-3 md:p-4 transition cursor-pointer flex flex-col sm:flex-row justify-between gap-2 sm:gap-3 ${
+            className={`p-3 md:p-4 transition cursor-pointer flex flex-col gap-1 ${
               n.user_read === 0
                 ? "bg-teal-50 hover:bg-teal-100"
                 : "bg-white hover:bg-gray-50"
@@ -176,13 +176,13 @@ export default function UserNotificationBell() {
                 {n.user_read === 0 && (
                   <span className="w-2 h-2 rounded-full bg-teal-500 shrink-0" />
                 )}
-                <p className="text-sm text-gray-800 truncate">{n.message}</p>
+                <p className="text-sm text-gray-800 break-words">{n.message}</p>
               </div>
-              <p className="text-xs text-gray-500 truncate">
+              <p className="text-xs text-gray-500">
                 Transaction: {n.transaction}
               </p>
             </div>
-            <span className="text-xs text-gray-400 whitespace-nowrap mt-1 sm:mt-0">
+           <span className="text-xs text-gray-400">
               {getRelativeTime(n.created_at)}
             </span>
           </div>
