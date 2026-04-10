@@ -149,7 +149,7 @@ export default function UserNotificationBell() {
       {open && (
   <div
     className="
-      fixed top-16 right-4 w-[95vw] max-w-sm sm:max-w-md bg-white shadow-xl rounded-xl border z-50
+      fixed top-14 left-2 right-2 sm:left-auto sm:right-4 sm:w-96 bg-white shadow-xl rounded-xl border z-50
     "
   >
     {/* Header */}
