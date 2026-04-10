@@ -35,7 +35,7 @@ function ManageUsers() {
     try {
       setUserStatuses((prev) => ({ ...prev, [id]: newStatus }));
       setShowModal(false);
-      setSelectedUserId(null);
+      setSelectedUserId(null); // Deselect user after action
       setMessageModal({ show: true, message: "Updating status...", success: null });
 
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/updateStatus.php`, {
@@ -47,6 +47,7 @@ function ManageUsers() {
       const data = await res.json();
 
       if (!data.success) {
+        // Revert status if update fails
         setUserStatuses((prev) => ({ ...prev, [id]: registered.find(u => u.id === id).status }));
         setMessageModal({ show: true, message: "Failed: " + data.message, success: false });
       } else {
@@ -90,9 +91,10 @@ function ManageUsers() {
     `${r.firstname?.[0] ?? ""}${r.lastname?.[0] ?? ""}`.toUpperCase();
 
   return (
-    <div className="flex h-full overflow-hidden">
+    <div className="flex h-full overflow-hidden"> {/* Parent container still prevents overall scrolling */}
 
-      {/* ── Additional Info Modal ── */}
+      {/* ── All Modals (kept as is) ── */}
+      {/* Additional Info Modal */}
       {infoModal.show && infoModal.data && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-xl w-80 overflow-hidden">
@@ -119,7 +121,7 @@ function ManageUsers() {
         </div>
       )}
 
-      {/* ── Emergency Modal ── */}
+      {/* Emergency Modal */}
       {emergencyModal.show && emergencyModal.data && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-xl w-80 overflow-hidden">
@@ -145,7 +147,7 @@ function ManageUsers() {
         </div>
       )}
 
-      {/* ── Message / Loading Modal ── */}
+      {/* Message / Loading Modal */}
       {messageModal.show && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-xl w-80 overflow-hidden">
@@ -184,7 +186,7 @@ function ManageUsers() {
         </div>
       )}
 
-      {/* ── Confirmation Modal ── */}
+      {/* Confirmation Modal */}
       {showModal && modalUser && (
         <div className="fixed inset-0 bg-white/10 backdrop-blur-xl bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-96 shadow-xl text-center">
@@ -215,8 +217,7 @@ function ManageUsers() {
       {/* ══════════════════════════════════════════
           LEFT PANEL — list
       ══════════════════════════════════════════ */}
-      <div className="w-72 min-w-[17rem] flex flex-col border-r border-slate-200 bg-white overflow-hidden">
-
+      <div className="w-72 min-w-[17rem] flex flex-col border-r border-slate-200 bg-white"> {/* Removed overflow-hidden from this div */}
         {/* Search */}
         <div className="p-3 border-b border-slate-200">
           <input
@@ -260,8 +261,8 @@ function ManageUsers() {
           </p>
         )}
 
-        {/* User list */}
-        <div className="flex-1 overflow-y-auto">
+        {/* User list - THIS IS THE SCROLLABLE PART */}
+        <div className="flex-1 overflow-y-auto"> {/* Keep this overflow-y-auto */}
           {filteredUsers.length === 0 ? (
             <p className="text-center text-slate-400 text-sm mt-10">No users found.</p>
           ) : (
@@ -301,7 +302,9 @@ function ManageUsers() {
       {/* ══════════════════════════════════════════
           RIGHT PANEL — detail
       ══════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-slate-50">
+      {/* The main container for the right panel should NOT scroll.
+          Its content area (specifically the `detail body`) should scroll instead if necessary. */}
+      <div className="flex-1 flex flex-col bg-slate-50"> {/* Removed overflow-hidden from here */}
         {!selectedUser ? (
           /* Empty state */
           <div className="flex-1 flex flex-col items-center justify-center gap-3 text-slate-400">
@@ -356,9 +359,8 @@ function ManageUsers() {
               </div>
             </div>
 
-            {/* Detail body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-5">
-
+            {/* Detail body - THIS IS THE SCROLLABLE PART ON THE RIGHT */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-5"> {/* Added overflow-y-auto here */}
               <Section title="Personal information">
                 <div className="grid grid-cols-2 gap-3">
                   <InfoCard label="Civil status" value={selectedUser.civilstatus} />

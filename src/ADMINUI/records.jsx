@@ -45,7 +45,7 @@ function Records() {
     <div className="flex h-full overflow-hidden">
 
       {/* ───────── LEFT PANEL ───────── */}
-      <div className="w-72 min-w-[17rem] flex flex-col border-r border-slate-200 bg-white">
+      <div className="w-72 min-w-[17rem] flex flex-col border-r border-slate-200 bg-white h-full">
 
         {/* Search */}
         <div className="p-3 border-b">
@@ -83,7 +83,7 @@ function Records() {
           })}
         </div>
 
-        {/* List */}
+        {/* List (ONLY SCROLLING AREA) */}
         <div className="flex-1 overflow-y-auto">
           {filteredUsers.map((u) => {
             const color = statusColors[u.status] || statusColors.Pending;
@@ -97,8 +97,9 @@ function Records() {
                   active ? "bg-emerald-50 border-l-2 border-l-emerald-600" : ""
                 }`}
               >
+                {/* CHANGED: now uses NAME initial */}
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold ${color.bg} ${color.text}`}>
-                  {u.transaction?.[0] || "R"}
+                  {u.name?.trim()?.[0]?.toUpperCase() || "R"}
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -118,7 +119,7 @@ function Records() {
       </div>
 
       {/* ───────── RIGHT PANEL ───────── */}
-      <div className="flex-1 flex flex-col bg-slate-50 overflow-hidden">
+      <div className="flex-1 flex flex-col bg-slate-50 h-full overflow-hidden">
 
         {!selected ? (
           <div className="flex-1 flex items-center justify-center text-slate-400">
@@ -126,10 +127,11 @@ function Records() {
           </div>
         ) : (
           <>
-            {/* Header */}
+            {/* Header (fixed, no scroll) */}
             <div className="bg-white border-b px-6 py-4 flex items-center gap-4">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold ${selectedColor.bg} ${selectedColor.text}`}>
-                {selected.transaction?.[0] || "R"}
+                {/* CHANGED: uses NAME initial */}
+                {selected.name?.trim()?.[0]?.toUpperCase() || "R"}
               </div>
 
               <div>
@@ -141,8 +143,8 @@ function Records() {
               </div>
             </div>
 
-            {/* Body */}
-            <div className="p-6 space-y-5 overflow-y-auto">
+            {/* Body (NO SCROLL) */}
+            <div className="p-6 space-y-5">
 
               <Section title="Request Info">
                 <div className="grid grid-cols-2 gap-3">
