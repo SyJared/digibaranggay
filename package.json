@@ -12,10 +12,12 @@
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
     "@tailwindcss/vite": "^4.1.17",
+    "chart.js": "^4.5.1",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
+    "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.0",
     "react-router": "^7.1.5",
     "react-router-dom": "^7.10.1",

@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { RegisteredContext } from "../registeredContext";
-
+import ChartWithMonthModal from "./chart";
 
 function ActivityHeatmap({ users }) {
   const { registered } = useContext(RegisteredContext);
@@ -27,7 +27,6 @@ function ActivityHeatmap({ users }) {
     }));
   };
 
-  // Filter users for the current month
   const usersInMonth = users.filter(u => {
     const d = new Date(u.date);
     return d.getFullYear() === currentMonth.year && d.getMonth() === currentMonth.month;
@@ -60,7 +59,6 @@ function ActivityHeatmap({ users }) {
   const maxCount = Math.max(...monthDays.map(d => d.count));
   const monthName = new Date(currentMonth.year, currentMonth.month).toLocaleString("default", { month: "long" });
 
-  // Generate PDF
   const generatePDF = () => {
     const doc = new jsPDF();
 
@@ -71,12 +69,12 @@ function ActivityHeatmap({ users }) {
 
     const tableData = usersInMonth.map((u, index) => [
       index + 1,
-      u.name,        // Name
-      u.address,     // Address
-      u.purpose,     // Purpose
-      u.pay,         // Pay
-      u.date,        // Date
-      u.status,      // Status
+      u.name,
+      u.address,
+      u.purpose,
+      u.pay,
+      u.date,
+      u.status,
     ]);
 
     autoTable(doc, {
@@ -84,7 +82,7 @@ function ActivityHeatmap({ users }) {
       body: tableData,
       startY: 40,
       styles: { fontSize: 10 },
-      headStyles: { fillColor: [16, 185, 129] }, // green header
+      headStyles: { fillColor: [16, 185, 129] },
     });
 
     doc.save(`Requests for ${monthName}.pdf`);
@@ -116,15 +114,18 @@ function ActivityHeatmap({ users }) {
         ))}
       </div>
 
-      {/* Max request + Download PDF button */}
+      {/* Bottom row: max count + analytics + download */}
       <div className="mt-2 flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-300 font-medium">
-        <div>Max requests this month: {maxCount}</div>
-        <button
-          onClick={generatePDF}
-          className="bg-emerald-600 text-white px-3 py-1.5 rounded hover:bg-emerald-700 transition text-[11px] font-medium"
-        >
-          Download PDF
-        </button>
+        <div>Max: {maxCount} requests</div>
+        <div className="flex items-center gap-2">
+          <ChartWithMonthModal users={users} />
+          <button
+            onClick={generatePDF}
+            className="bg-emerald-600 text-white px-3 py-1.5 rounded hover:bg-emerald-700 transition text-[11px] font-medium"
+          >
+            Download PDF
+          </button>
+        </div>
       </div>
     </div>
   );
