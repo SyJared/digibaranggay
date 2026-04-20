@@ -44,7 +44,6 @@ function Requestees() {
       transaction,
       status,
       pickup: update.pickup,
-      pay: update.pay,
       response: update.response,
       action: status === "AllowAgain" ? "allow_again" : "update_status", // ✅ NEW
     };
