@@ -1,219 +1,180 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Bar, Doughnut, Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
-  ArcElement,
-  LineElement,
-  PointElement,
   Tooltip,
   Legend,
 } from "chart.js";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-const STATUSES = ["Accepted", "Pending", "Rejected", "Successful"];
-
+const STATUSES = ["Approved", "Pending", "Rejected", "Successful"];
 const STATUS_COLORS = {
-  Accepted:   "#378ADD",
+  Approved:   "#378ADD",
   Pending:    "#EF9F27",
   Rejected:   "#E24B4A",
   Successful: "#1D9E75",
 };
-
 const STATUS_TEXT_COLORS = {
-  Accepted:   { color: "#0C447C" },
+  Approved:   { color: "#0C447C" },
   Pending:    { color: "#854F0B" },
   Rejected:   { color: "#791F1F" },
   Successful: { color: "#085041" },
 };
 
-const TABS = ["By Status", "Distribution", "Over Time", "Resolution Time"];
+const TRANSACTIONS = [
+  "KKID Card",
+  "Working Clearance",
+  "OSCA",
+  "First Job Seeker",
+  "Barangay ID",
+  "Barangay Clearance",
+  "Certificate of Indigency",
+  "Barangay Inhabitants",
+];
 
-function getYM(date) {
-  const d = new Date(date);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-}
+const TRANSACTION_COLORS = [
+  "#6366f1", "#f59e0b", "#10b981", "#ef4444",
+  "#3b82f6", "#8b5cf6", "#ec4899", "#14b8a6",
+];
 
-function getMonthLabel(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleString("default", { month: "short", year: "numeric" });
-}
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const TABS = ["By Status", "By Transaction", "Busiest Days", "Payment Summary"];
 
 function daysBetween(dateA, dateB) {
+  if (!dateA || !dateB) return null;
   const a = new Date(dateA);
   const b = new Date(dateB);
-  return Math.max(0, Math.round((b - a) / (1000 * 60 * 60 * 24)));
+  const diff = Math.round((b - a) / (1000 * 60 * 60 * 24));
+  return diff >= 0 ? diff : null;
 }
 
-function formatMonthDisplay(ym) {
-  const [y, m] = ym.split("-");
-  return new Date(+y, +m - 1, 1).toLocaleString("default", {
-    month: "long",
-    year: "numeric",
-  });
-}
+const commonOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+    y: { grid: { color: "rgba(128,128,128,0.1)" }, beginAtZero: true, ticks: { font: { size: 11 } } },
+  },
+};
 
-function changeMonth(ym, delta) {
-  const [y, m] = ym.split("-").map(Number);
-  const d = new Date(y, m - 1 + delta, 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+function StatCard({ label, value, sub, valueStyle = {} }) {
+  return (
+    <div style={{ background: "#f9fafb", borderRadius: 8, padding: "0.6rem 0.85rem", border: "1px solid #e5e7eb" }}>
+      <p style={{ fontSize: 11, color: "#6b7280", margin: "0 0 3px" }}>{label}</p>
+      <p style={{ fontSize: 18, fontWeight: 600, margin: 0, color: "#111827", ...valueStyle }}>{value}</p>
+      {sub && <p style={{ fontSize: 11, color: "#6b7280", margin: "2px 0 0" }}>{sub}</p>}
+    </div>
+  );
 }
-
-// ─── Chart content (reused inside modal) ────────────────────────────────────
 
 function ChartContent({ users }) {
   const [activeTab, setActiveTab] = useState("By Status");
-
-  const counts = Object.fromEntries(STATUSES.map((s) => [s, 0]));
-  users.forEach((u) => {
-    if (counts[u.status] !== undefined) counts[u.status]++;
-  });
   const total = users.length || 1;
 
-  const monthMap = {};
-  users.forEach((u) => {
-    const effectiveDate =
-      u.status !== "Pending" && u.dateUpdated ? u.dateUpdated : u.date;
-    const label = getMonthLabel(effectiveDate);
-    if (!monthMap[label])
-      monthMap[label] = Object.fromEntries(STATUSES.map((s) => [s, 0]));
-    monthMap[label][u.status]++;
-  });
-  const sortedMonths = Object.keys(monthMap).sort(
-    (a, b) => new Date(a) - new Date(b)
-  );
+  // By Status
+  const statusCounts = Object.fromEntries(STATUSES.map((s) => [s, 0]));
+  users.forEach((u) => { if (statusCounts[u.status] !== undefined) statusCounts[u.status]++; });
 
-  const resolutionData = {};
-  const resolutionCount = {};
-  users.forEach((u) => {
-    if (u.status !== "Pending" && u.dateUpdated && u.date) {
-      const days = daysBetween(u.date, u.dateUpdated);
-      resolutionData[u.status] = (resolutionData[u.status] || 0) + days;
-      resolutionCount[u.status] = (resolutionCount[u.status] || 0) + 1;
-    }
-  });
-  const avgResolution = STATUSES.filter((s) => s !== "Pending").map((s) =>
-    resolutionCount[s]
-      ? Math.round(resolutionData[s] / resolutionCount[s])
-      : 0
-  );
-
-  const barData = {
+  const byStatusData = {
     labels: STATUSES,
-    datasets: [
-      {
-        label: "Requests",
-        data: STATUSES.map((s) => counts[s]),
-        backgroundColor: STATUSES.map((s) => STATUS_COLORS[s] + "CC"),
-        borderColor: STATUSES.map((s) => STATUS_COLORS[s]),
-        borderWidth: 1.5,
-        borderRadius: 4,
-      },
-    ],
+    datasets: [{
+      label: "Requests",
+      data: STATUSES.map((s) => statusCounts[s]),
+      backgroundColor: STATUSES.map((s) => STATUS_COLORS[s] + "CC"),
+      borderColor: STATUSES.map((s) => STATUS_COLORS[s]),
+      borderWidth: 1.5,
+      borderRadius: 4,
+    }],
   };
 
-  const doughnutData = {
-    labels: STATUSES,
-    datasets: [
-      {
-        data: STATUSES.map((s) => counts[s]),
-        backgroundColor: STATUSES.map((s) => STATUS_COLORS[s] + "CC"),
-        borderColor: STATUSES.map((s) => STATUS_COLORS[s]),
-        borderWidth: 1.5,
-        hoverOffset: 6,
-      },
-    ],
+  // By Transaction
+  const txCounts = Object.fromEntries(TRANSACTIONS.map((t) => [t, 0]));
+  users.forEach((u) => { if (u.transaction && txCounts[u.transaction] !== undefined) txCounts[u.transaction]++; });
+  const sortedTx = [...TRANSACTIONS].sort((a, b) => txCounts[b] - txCounts[a]);
+
+  const byTxData = {
+    labels: sortedTx.map((t) => t.length > 14 ? t.slice(0, 13) + "…" : t),
+    datasets: [{
+      label: "Requests",
+      data: sortedTx.map((t) => txCounts[t]),
+      backgroundColor: sortedTx.map((_, i) => TRANSACTION_COLORS[i % TRANSACTION_COLORS.length] + "CC"),
+      borderColor: sortedTx.map((_, i) => TRANSACTION_COLORS[i % TRANSACTION_COLORS.length]),
+      borderWidth: 1.5,
+      borderRadius: 4,
+    }],
   };
 
-  const lineData = {
-    labels: sortedMonths,
-    datasets: STATUSES.map((s) => ({
-      label: s,
-      data: sortedMonths.map((m) => monthMap[m]?.[s] || 0),
-      borderColor: STATUS_COLORS[s],
-      backgroundColor: STATUS_COLORS[s] + "33",
-      borderWidth: 2,
-      borderDash:
-        s === "Pending" ? [6, 3] : s === "Rejected" ? [2, 2] : [],
-      pointRadius: 4,
-      tension: 0.3,
-      fill: false,
-    })),
+  // Busiest Days
+  const dayCounts = Array(7).fill(0);
+  users.forEach((u) => { if (u.date) dayCounts[new Date(u.date).getDay()]++; });
+
+  const byDayData = {
+    labels: DAYS,
+    datasets: [{
+      label: "Requests",
+      data: dayCounts,
+      backgroundColor: "#6366f1CC",
+      borderColor: "#6366f1",
+      borderWidth: 1.5,
+      borderRadius: 4,
+    }],
   };
 
-  const resolvedStatuses = STATUSES.filter((s) => s !== "Pending");
-  const resolutionBarData = {
-    labels: resolvedStatuses,
-    datasets: [
-      {
-        label: "Avg days to resolution",
-        data: avgResolution,
-        backgroundColor: resolvedStatuses.map((s) => STATUS_COLORS[s] + "CC"),
-        borderColor: resolvedStatuses.map((s) => STATUS_COLORS[s]),
-        borderWidth: 1.5,
-        borderRadius: 4,
-      },
-    ],
+  // Payment Summary
+  let freeCount = 0;
+let paidCount = 0;
+let totalRevenue = 0;
+
+users.forEach((u) => {
+  if (u.status !== "Successful") return; // 👈 only successful requests
+
+  const amount = parseFloat(u.pay);
+
+  if (!amount || amount === 0) {
+    freeCount++;
+  } else {
+    paidCount++;
+    totalRevenue += amount;
+  }
+});
+
+  const payData = {
+    labels: ["Free", "Paid"],
+    datasets: [{
+      label: "Requests",
+      data: [freeCount, paidCount],
+      backgroundColor: ["#10b981CC", "#6366f1CC"],
+      borderColor: ["#10b981", "#6366f1"],
+      borderWidth: 1.5,
+      borderRadius: 4,
+    }],
   };
 
-  const commonOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-  };
+  // Avg Resolution by Transaction
+  
 
-  const scaleOptions = {
-    x: { grid: { display: false }, ticks: { font: { size: 12 } } },
-    y: {
-      grid: { color: "rgba(128,128,128,0.12)" },
-      beginAtZero: true,
-      ticks: { font: { size: 12 } },
-    },
-  };
+  const mostRequested = sortedTx[0] || "—";
+  const busiestDay = DAYS[dayCounts.indexOf(Math.max(...dayCounts))];
 
   return (
-    <div style={{ fontFamily: "var(--font-sans)" }}>
-      {/* Metric Cards */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-          gap: 8,
-          marginBottom: "1rem",
-        }}
-      >
-        {STATUSES.map((s) => (
-          <div
-            key={s}
-            style={{
-              background: "var(--color-background-secondary)",
-              borderRadius: "var(--border-radius-md)",
-              padding: "0.6rem 0.85rem",
-            }}
-          >
-            <p style={{ fontSize: 11, color: "var(--color-text-secondary)", margin: "0 0 3px" }}>
-              {s}
-            </p>
-            <p style={{ fontSize: 20, fontWeight: 500, margin: 0, ...STATUS_TEXT_COLORS[s] }}>
-              {counts[s]}
-            </p>
-            <p style={{ fontSize: 11, color: "var(--color-text-secondary)", margin: "2px 0 0" }}>
-              {Math.round((counts[s] / total) * 100)}%
-            </p>
-          </div>
-        ))}
+    <div style={{ fontFamily: "sans-serif" }}>
+      {/* Top summary cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0,1fr))", gap: 8, marginBottom: 8 }}>
+        <StatCard label="Total Requests" value={users.length} />
+        <StatCard label="Pending" value={statusCounts["Pending"]} valueStyle={STATUS_TEXT_COLORS["Pending"]} />
+        <StatCard label="Total payment" value={`₱${totalRevenue.toFixed(2)}`} valueStyle={{ color: "#059669" }} />
+        <StatCard label="Free Requests" value={freeCount} sub={`${Math.round((freeCount / total) * 100)}% of total`} />
+      </div>
+
+      {/* Second row */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 8, marginBottom: "1rem" }}>
+        <StatCard label="Most Requested" value={mostRequested} />
+        <StatCard label="Busiest Day" value={busiestDay} />
       </div>
 
       {/* Tabs */}
@@ -223,18 +184,12 @@ function ChartContent({ users }) {
             key={tab}
             onClick={() => setActiveTab(tab)}
             style={{
-              fontSize: 12,
-              padding: "4px 12px",
-              borderRadius: "var(--border-radius-md)",
-              border: "0.5px solid var(--color-border-secondary)",
-              background:
-                activeTab === tab
-                  ? "var(--color-background-secondary)"
-                  : "transparent",
-              color:
-                activeTab === tab
-                  ? "var(--color-text-primary)"
-                  : "var(--color-text-secondary)",
+              fontSize: 11,
+              padding: "4px 10px",
+              borderRadius: 6,
+              border: "1px solid #e5e7eb",
+              background: activeTab === tab ? "#111827" : "#f9fafb",
+              color: activeTab === tab ? "#ffffff" : "#6b7280",
               fontWeight: activeTab === tab ? 500 : 400,
               cursor: "pointer",
             }}
@@ -244,106 +199,61 @@ function ChartContent({ users }) {
         ))}
       </div>
 
-      {/* Legend */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 12,
-          marginBottom: 10,
-          fontSize: 12,
-          color: "var(--color-text-secondary)",
-        }}
-      >
-        {STATUSES.map((s) => (
-          <span key={s} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <span
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: 2,
-                background: STATUS_COLORS[s],
-                flexShrink: 0,
-              }}
-            />
-            {s}
-          </span>
-        ))}
-      </div>
-
-      {/* Chart Panels */}
+      {/* Chart */}
       <div style={{ position: "relative", width: "100%", height: 260 }}>
-        {activeTab === "By Status" && (
-          <Bar data={barData} options={{ ...commonOptions, scales: scaleOptions }} />
-        )}
-
-        {activeTab === "Distribution" && (
-          <Doughnut
-            data={doughnutData}
+        {activeTab === "By Status" && <Bar data={byStatusData} options={commonOptions} />}
+        {activeTab === "By Transaction" && <Bar data={byTxData} options={commonOptions} />}
+        {activeTab === "Busiest Days" && <Bar data={byDayData} options={commonOptions} />}
+        {activeTab === "Payment Summary" && (
+          <Bar
+            data={payData}
             options={{
               ...commonOptions,
               plugins: {
                 legend: { display: false },
                 tooltip: {
                   callbacks: {
-                    label: (ctx) =>
-                      ` ${ctx.label}: ${ctx.parsed} (${Math.round(
-                        (ctx.parsed / total) * 100
-                      )}%)`,
+                    afterLabel: (ctx) => ctx.label === "Paid" ? `Total: ₱${totalRevenue.toFixed(2)}` : "",
                   },
                 },
               },
             }}
           />
         )}
-
-        {activeTab === "Over Time" && (
-          <Line data={lineData} options={{ ...commonOptions, scales: scaleOptions }} />
-        )}
-
-        {activeTab === "Resolution Time" && (
+        {activeTab === "Avg Resolution" && (
           <Bar
-            data={resolutionBarData}
+            data={resData}
             options={{
               ...commonOptions,
               scales: {
-                ...scaleOptions,
-                y: {
-                  ...scaleOptions.y,
-                  title: { display: true, text: "Days", font: { size: 11 } },
-                },
+                ...commonOptions.scales,
+                y: { ...commonOptions.scales.y, title: { display: true, text: "Days", font: { size: 11 } } },
               },
             }}
           />
         )}
       </div>
 
-      {activeTab === "Over Time" && (
-        <p style={{ fontSize: 11, color: "var(--color-text-secondary)", marginTop: 6 }}>
-          Non-pending plotted by <strong>dateUpdated</strong>; pending by <strong>date</strong>.
+      {activeTab === "Avg Resolution" && (
+        <p style={{ fontSize: 11, color: "#6b7280", marginTop: 6 }}>
+          Average days from <strong>date</strong> to <strong>completed_date</strong>. Only completed requests counted.
         </p>
       )}
-      {activeTab === "Resolution Time" && (
-        <p style={{ fontSize: 11, color: "var(--color-text-secondary)", marginTop: 6 }}>
-          Average days from <strong>date</strong> to <strong>dateUpdated</strong> (excludes Pending).
+      {activeTab === "Payment Summary" && (
+        <p style={{ fontSize: 11, color: "#6b7280", marginTop: 6 }}>
+          <strong>Free</strong> = ₱0.00 requests. Hover the Paid bar to see total revenue.
         </p>
       )}
     </div>
   );
 }
 
-// ─── Main exported component ──────────────────────────────────────────────────
-
+// ─── Modal ───────────────────────────────────────────────────────────────────
 function ChartWithMonthModal({ users: allUsers = [] }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const overlayRef = useRef(null);
-
-  const now = new Date();
-  const [currentYM, setCurrentYM] = useState(
-    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
-  );
-
-  const filteredUsers = allUsers.filter((u) => u.date?.startsWith(currentYM));
 
   useEffect(() => {
     const handleKey = (e) => { if (e.key === "Escape") setIsOpen(false); };
@@ -351,21 +261,25 @@ function ChartWithMonthModal({ users: allUsers = [] }) {
     return () => document.removeEventListener("keydown", handleKey);
   }, [isOpen]);
 
-  const handlePrev = () => setCurrentYM((ym) => changeMonth(ym, -1));
-  const handleNext = () => setCurrentYM((ym) => changeMonth(ym, 1));
+  const filteredUsers = allUsers.filter((u) => {
+    if (!u.date) return true;
+    if (fromDate && u.date < fromDate) return false;
+    if (toDate && u.date > toDate) return false;
+    return true;
+  });
 
   return (
     <>
       <button
         onClick={() => setIsOpen(true)}
         style={{
-          padding: "8px 18px",
-          fontSize: 14,
+          padding: "4px 10px",
+          fontSize: 11,
           fontWeight: 500,
-          borderRadius: "var(--border-radius-md)",
-          border: "0.5px solid var(--color-border-secondary)",
-          background: "var(--color-background-secondary)",
-          color: "var(--color-text-primary)",
+          borderRadius: 6,
+          border: "1px solid #e5e7eb",
+          background: "#f9fafb",
+          color: "#111827",
           cursor: "pointer",
         }}
       >
@@ -389,106 +303,56 @@ function ChartWithMonthModal({ users: allUsers = [] }) {
         >
           <div
             style={{
-              background: "var(--color-background-primary)",
-              borderRadius: "var(--border-radius-lg)",
-              border: "0.5px solid var(--color-border-tertiary)",
+              background: "#ffffff",
+              borderRadius: 12,
+              border: "1px solid #e5e7eb",
               width: "100%",
-              maxWidth: 660,
+              maxWidth: 680,
               maxHeight: "90vh",
               overflowY: "auto",
               padding: "1.25rem 1.5rem",
             }}
           >
-            {/* Modal header */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: "1rem",
-              }}
-            >
-              <span style={{ fontSize: 15, fontWeight: 500, color: "var(--color-text-primary)" }}>
-                Request analytics
-              </span>
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+              <span style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>Request Analytics</span>
               <button
                 onClick={() => setIsOpen(false)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  fontSize: 18,
-                  color: "var(--color-text-secondary)",
-                  cursor: "pointer",
-                  lineHeight: 1,
-                  padding: "2px 6px",
-                }}
+                style={{ background: "transparent", border: "none", fontSize: 18, color: "#6b7280", cursor: "pointer", padding: "2px 6px" }}
               >
                 ✕
               </button>
             </div>
 
-            {/* Month navigator */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: "1rem",
-              }}
-            >
-              <button
-                onClick={handlePrev}
-                style={{
-                  padding: "5px 10px",
-                  fontSize: 16,
-                  borderRadius: "var(--border-radius-md)",
-                  border: "0.5px solid var(--color-border-secondary)",
-                  background: "transparent",
-                  color: "var(--color-text-primary)",
-                  cursor: "pointer",
-                  lineHeight: 1,
-                }}
-              >
-                ‹
-              </button>
-
+            {/* Date range filter */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "1rem", flexWrap: "wrap" }}>
+              <span style={{ fontSize: 12, color: "#6b7280" }}>From</span>
               <input
-                type="month"
-                value={currentYM}
-                onChange={(e) => setCurrentYM(e.target.value)}
-                style={{
-                  padding: "5px 10px",
-                  fontSize: 13,
-                  borderRadius: "var(--border-radius-md)",
-                  border: "0.5px solid var(--color-border-secondary)",
-                  background: "var(--color-background-secondary)",
-                  color: "var(--color-text-primary)",
-                  cursor: "pointer",
-                }}
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                style={{ padding: "4px 8px", fontSize: 12, borderRadius: 6, border: "1px solid #e5e7eb", background: "#f9fafb", color: "#111827" }}
               />
-
-              <button
-                onClick={handleNext}
-                style={{
-                  padding: "5px 10px",
-                  fontSize: 16,
-                  borderRadius: "var(--border-radius-md)",
-                  border: "0.5px solid var(--color-border-secondary)",
-                  background: "transparent",
-                  color: "var(--color-text-primary)",
-                  cursor: "pointer",
-                  lineHeight: 1,
-                }}
-              >
-                ›
-              </button>
-
-              <span style={{ fontSize: 13, color: "var(--color-text-secondary)", marginLeft: 4 }}>
-                {formatMonthDisplay(currentYM)}
+              <span style={{ fontSize: 12, color: "#6b7280" }}>To</span>
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                style={{ padding: "4px 8px", fontSize: 12, borderRadius: 6, border: "1px solid #e5e7eb", background: "#f9fafb", color: "#111827" }}
+              />
+              {(fromDate || toDate) && (
+                <button
+                  onClick={() => { setFromDate(""); setToDate(""); }}
+                  style={{ fontSize: 11, padding: "4px 8px", borderRadius: 6, border: "1px solid #fca5a5", background: "#fef2f2", color: "#ef4444", cursor: "pointer" }}
+                >
+                  Clear
+                </button>
+              )}
+              <span style={{ fontSize: 11, color: "#6b7280" }}>
+                {filteredUsers.length} of {allUsers.length} requests
               </span>
             </div>
 
-            {/* Chart content filtered to selected month */}
             <ChartContent users={filteredUsers} />
           </div>
         </div>
