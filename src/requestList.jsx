@@ -13,7 +13,7 @@ export function RequestProvider({ children }) {
 
   const fetchRequests = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/requestees.php`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/digidb/requestees.php`);
       const result = await res.json();
       if (result.success) {
       const cleaned = (result.data || []).map((u) => ({
@@ -52,3 +52,4 @@ export function RequestProvider({ children }) {
     </RequestContext.Provider>
   );
 }
+

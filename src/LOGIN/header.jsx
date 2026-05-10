@@ -17,7 +17,7 @@ function Header() {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/logout.php`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/digidb/logout.php`, {
         method: "POST",
         credentials: "include",
       });

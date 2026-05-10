@@ -38,7 +38,7 @@ function ManageUsers() {
       setSelectedUserId(null); // Deselect user after action
       setMessageModal({ show: true, message: "Updating status...", success: null });
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/updateStatus.php`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/digidb/updateStatus.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status: newStatus }),
@@ -434,3 +434,4 @@ const InfoRow = ({ label, value }) => (
 );
 
 export default ManageUsers;
+

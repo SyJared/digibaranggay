@@ -32,7 +32,7 @@ export default function UserNotificationBell() {
 
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/get_user_notifications.php`,
+        `${import.meta.env.VITE_API_URL}/digidb/get_user_notifications.php`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -72,7 +72,7 @@ export default function UserNotificationBell() {
   try {
     await Promise.all(
       unread.map(n =>
-        fetch(`${import.meta.env.VITE_API_URL}/api/mark_user_notification_read.php`, {
+        fetch(`${import.meta.env.VITE_API_URL}/digidb/mark_user_notification_read.php`, {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },

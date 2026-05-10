@@ -25,7 +25,7 @@ export default function AdditionalInfo({ isOpen: parentOpen, onClose: parentClos
 
     async function fetchData() {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/additionalInfo.php`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/digidb/additionalInfo.php`, {
           method: "GET",
           credentials: "include",
         });
@@ -55,7 +55,7 @@ export default function AdditionalInfo({ isOpen: parentOpen, onClose: parentClos
     e.preventDefault();
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/additionalInfo.php`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/digidb/additionalInfo.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -231,3 +231,4 @@ export default function AdditionalInfo({ isOpen: parentOpen, onClose: parentClos
     </>
   );
 }
+

@@ -23,7 +23,7 @@ function Requestees() {
         ? `Your request for ${transaction} has been Approved.`
         : `Your request for ${transaction} has been Rejected. Please contact the barangay for more details.`;
 
-    await fetch(`${import.meta.env.VITE_API_URL}/api/push_user_notification.php`, {
+    await fetch(`${import.meta.env.VITE_API_URL}/digidb/push_user_notification.php`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -50,7 +50,7 @@ function Requestees() {
 
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/handlestatus.php`,
+        `${import.meta.env.VITE_API_URL}/digidb/handlestatus.php`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

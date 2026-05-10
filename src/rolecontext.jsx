@@ -12,7 +12,7 @@ export function RoleProvider({ children }) {
   const [role, setRole] = useState("");
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/checkAuth.php`, {
+    fetch(`${import.meta.env.VITE_API_URL}/digidb/checkAuth.php`, {
       credentials: "include", // important for PHP session cookies
     })
       .then(res => res.json())

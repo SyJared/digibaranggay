@@ -27,7 +27,7 @@ function Adhome() {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/checkAuth.php`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/digidb/checkAuth.php`, {
           method: "GET",
           credentials: "include", // important for PHP session
         });

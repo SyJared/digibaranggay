@@ -17,7 +17,7 @@ function Login() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/checkAuth.php`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/digidb/checkAuth.php`, {
           method: "GET",
           credentials: "include",
         });
@@ -50,7 +50,7 @@ function Login() {
     setMessage("");
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login.php`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/digidb/login.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -61,7 +61,7 @@ function Login() {
 
       if (data.success) {
         // Fetch session immediately
-        const authRes = await fetch(`${import.meta.env.VITE_API_URL}/api/checkAuth.php`, {
+        const authRes = await fetch(`${import.meta.env.VITE_API_URL}/digidb/checkAuth.php`, {
           method: "GET",
           credentials: "include"
         });

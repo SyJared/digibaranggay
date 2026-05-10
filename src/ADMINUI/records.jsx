@@ -94,7 +94,7 @@ function Records() {
 
   try {
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/mark_successful.php`,
+      `${import.meta.env.VITE_API_URL}/digidb/mark_successful.php`,
       {
         method: "POST",
         headers: {
@@ -144,7 +144,7 @@ const handleDownload = async (userId, transaction, purpose) => {
     formData.append("transaction", transaction);
     formData.append("purpose", purpose);
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/generate_doc.php`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/digidb/generate_doc.php`, {
       method: "POST",
       body: formData,
       credentials: "include",
